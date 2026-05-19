@@ -160,7 +160,7 @@ export function RateChart() {
         </motion.div>
 
         <p className="mt-8 md:mt-12 font-mono text-[10px] uppercase tracking-[0.25em] text-bone/40 max-w-2xl">
-          Sumber data: Yahoo Finance · Diperbarui setiap 15 menit
+          Sumber data: Yahoo Finance · Diperbarui setiap 5 menit
         </p>
       </div>
     </section>

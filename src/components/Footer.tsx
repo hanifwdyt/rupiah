@@ -21,7 +21,7 @@ export function Footer() {
           </div>
           <div>
             <span className="text-bone/40">Update </span>
-            Setiap 15 menit
+            Setiap 5 menit
           </div>
         </div>
       </div>

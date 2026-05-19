@@ -17,8 +17,8 @@ export async function register() {
 
   const tz = "Asia/Jakarta";
 
-  // Fetch rate every 15 minutes (Yahoo Finance is real-time so this gives a richer chart)
-  cron.schedule("*/15 * * * *", () => { void runFetchRate(); }, { timezone: tz });
+  // Fetch rate every 5 minutes (Yahoo Finance is real-time)
+  cron.schedule("*/5 * * * *", () => { void runFetchRate(); }, { timezone: tz });
 
   // Crawl news every 6 hours
   cron.schedule("0 */6 * * *", () => { void runCrawlNews(); }, { timezone: tz });

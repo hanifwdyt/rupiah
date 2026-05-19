@@ -67,12 +67,12 @@ export function RateHero() {
   const direction = change == null ? "neutral" : change > 0 ? "down" : "up";
   const directionText =
     change == null
-      ? "memuat data terakhir…"
+      ? "memuat…"
       : change > 0.05
-        ? `rupiah melemah ${fmtPct(change)} dalam 24 jam`
+        ? `Rupiah melemah ${fmtPct(change)} dibanding kemarin`
         : change < -0.05
-          ? `rupiah menguat ${fmtPct(Math.abs(change))} dalam 24 jam`
-          : "stabil dalam 24 jam";
+          ? `Rupiah menguat ${fmtPct(Math.abs(change))} dibanding kemarin`
+          : "Bergerak stabil 24 jam terakhir";
 
   return (
     <section className="relative min-h-screen flex flex-col justify-between px-6 md:px-12 py-8 md:py-12 overflow-hidden">
@@ -80,7 +80,7 @@ export function RateHero() {
       <header className="flex items-center justify-between text-[11px] md:text-xs font-mono uppercase tracking-[0.2em] text-subtle">
         <div className="flex items-center gap-3">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-crimson animate-pulse" />
-          <span>Live · USD/IDR</span>
+          <span>Kurs Live</span>
         </div>
         <div className="hidden md:block">
           {fmtDateJakarta(now, { hour: "2-digit", minute: "2-digit", second: "2-digit" })} WIB
@@ -95,7 +95,7 @@ export function RateHero() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="font-mono text-[11px] md:text-xs uppercase tracking-[0.3em] text-subtle mb-4 md:mb-6"
         >
-          1 Dolar Amerika setara
+          1 US Dollar =
         </motion.div>
 
         <div className="relative">
@@ -137,19 +137,19 @@ export function RateHero() {
         </motion.div>
       </div>
 
-      {/* footer manifesto */}
+      {/* footer info */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.6, duration: 0.8 }}
         className="grid md:grid-cols-3 gap-6 md:gap-12 pt-12 md:pt-0 max-w-5xl"
       >
-        <p className="text-sm md:text-base leading-relaxed text-ink/80 md:col-span-2 font-serif">
-          Sebuah catatan terbuka soal pelemahan rupiah — diperbarui otomatis, dikirim ke lo
-          tiga kali sehari, dibaca dari sumber resmi global.
+        <p className="text-sm md:text-base leading-relaxed text-ink/80 md:col-span-2">
+          Pantau pergerakan kurs USD/IDR secara real-time, lengkap dengan grafik historis dan berita
+          terkait kebijakan ekonomi. Update otomatis tiga kali sehari.
         </p>
         <div className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.25em] text-subtle md:text-right md:self-end">
-          ↓ Scroll buat lihat chart, riwayat, dan berita
+          ↓ Scroll ke bawah
         </div>
       </motion.div>
     </section>

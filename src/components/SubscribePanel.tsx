@@ -105,10 +105,10 @@ export function SubscribePanel() {
           transition={{ duration: 0.8 }}
         >
           <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-subtle mb-6">
-            ─ 02 / Tetap terhubung
+            Berlangganan
           </div>
           <h2 className="font-serif italic font-normal text-4xl md:text-6xl lg:text-7xl leading-[0.95] mb-12 md:mb-16 max-w-3xl">
-            Tiga kali sehari.<br />Tanpa lo perlu buka aplikasi.
+            Update kurs langsung ke perangkat kamu
           </h2>
         </motion.div>
 
@@ -122,18 +122,19 @@ export function SubscribePanel() {
             className="bg-bone p-8 md:p-12 flex flex-col"
           >
             <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtle mb-4">
-              Channel 01 — Browser
+              Notifikasi Browser
             </div>
-            <h3 className="font-serif italic text-2xl md:text-3xl mb-3">Notifikasi push.</h3>
+            <h3 className="font-serif italic text-2xl md:text-3xl mb-3">Push Notification</h3>
             <p className="text-sm md:text-base text-ink/70 leading-relaxed mb-8 flex-1">
-              Aktifkan sekali, lo dapet notifikasi langsung di device tiap jam 09:00, 15:00, dan 21:00 WIB.
+              Aktifkan sekali, terima notifikasi otomatis setiap pukul 09:00, 15:00, dan 21:00 WIB
+              tanpa perlu membuka website.
             </p>
 
             {isIOS && !isPWA && (
               <div className="mb-6 p-4 border border-ink/20 bg-bone">
-                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle mb-2">iOS</div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle mb-2">Catatan untuk iOS</div>
                 <p className="text-sm leading-relaxed">
-                  Buat enable push di iPhone: tap tombol <span className="font-mono">Share</span> di Safari → <span className="font-mono">Add to Home Screen</span>. Buka dari home screen, lalu klik enable.
+                  Tap tombol <span className="font-mono">Share</span> di Safari, pilih <span className="font-mono">Add to Home Screen</span>. Buka dari home screen, lalu aktifkan notifikasi.
                 </p>
               </div>
             )}
@@ -158,7 +159,7 @@ export function SubscribePanel() {
                       ? "Izin ditolak"
                       : push === "unsupported"
                         ? "Browser tidak mendukung"
-                        : "Aktifkan notifikasi"}
+                        : "Aktifkan"}
               </span>
               {push !== "subscribed" && push !== "denied" && push !== "unsupported" && (
                 <span className="font-serif italic text-lg group-hover:translate-x-1 transition-transform">→</span>
@@ -175,11 +176,12 @@ export function SubscribePanel() {
             className="bg-bone p-8 md:p-12 flex flex-col"
           >
             <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtle mb-4">
-              Channel 02 — Email
+              Email
             </div>
-            <h3 className="font-serif italic text-2xl md:text-3xl mb-3">Inbox harian.</h3>
+            <h3 className="font-serif italic text-2xl md:text-3xl mb-3">Update via Email</h3>
             <p className="text-sm md:text-base text-ink/70 leading-relaxed mb-8 flex-1">
-              Update kurs dikirim ke inbox lo. Klik link konfirmasi pertama kali — habis itu otomatis.
+              Terima ringkasan kurs ke inbox tiga kali sehari. Konfirmasi alamat email sekali,
+              setelah itu otomatis.
             </p>
             <form onSubmit={submitEmail} className="space-y-3">
               <input
@@ -187,7 +189,7 @@ export function SubscribePanel() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="lo@email.com"
+                placeholder="nama@email.com"
                 className="w-full bg-transparent border-b border-ink/30 focus:border-ink py-3 font-mono text-sm placeholder:text-subtle/60 outline-none transition-colors"
               />
               <button
@@ -201,10 +203,10 @@ export function SubscribePanel() {
                   {emailState === "loading"
                     ? "Mengirim…"
                     : emailState === "sent"
-                      ? "✓ Cek inbox lo"
+                      ? "✓ Cek inbox kamu"
                       : emailState === "error"
                         ? "Gagal, coba lagi"
-                        : "Kirim verifikasi"}
+                        : "Daftar"}
                 </span>
                 {emailState === "idle" && (
                   <span className="font-serif italic text-lg group-hover:translate-x-1 transition-transform">→</span>

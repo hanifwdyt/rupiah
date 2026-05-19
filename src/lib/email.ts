@@ -32,13 +32,13 @@ export async function sendVerificationEmail(email: string, token: string): Promi
   await c.emails.send({
     from: FROM,
     to: email,
-    subject: "Konfirmasi langganan — Rupiah Tracker",
+    subject: "Konfirmasi langganan kurs USD/IDR",
     html: `
 <div style="font-family:Georgia,serif;background:#F2EDE3;color:#0D0C0A;padding:40px;max-width:560px;margin:auto">
-  <h1 style="font-size:32px;font-style:italic;font-weight:400;margin:0 0 16px">Satu langkah lagi.</h1>
-  <p style="line-height:1.6;font-size:16px">Klik link di bawah untuk konfirmasi alamat email lo. Setelah itu lo bakal terima update kurs USD/IDR tiga kali sehari (09:00, 15:00, 21:00 WIB).</p>
-  <p style="margin:32px 0"><a href="${url}" style="background:#0D0C0A;color:#F2EDE3;padding:14px 24px;text-decoration:none;font-family:monospace;font-size:14px;letter-spacing:0.05em">KONFIRMASI EMAIL →</a></p>
-  <p style="font-size:13px;color:#6B6760;line-height:1.5">Kalau lo ga pernah subscribe, abaikan email ini.</p>
+  <h1 style="font-size:32px;font-style:italic;font-weight:400;margin:0 0 16px">Konfirmasi alamat email kamu</h1>
+  <p style="line-height:1.6;font-size:16px">Klik tombol di bawah untuk mengaktifkan langganan. Setelah dikonfirmasi, kamu akan menerima update kurs USD/IDR setiap pukul 09:00, 15:00, dan 21:00 WIB.</p>
+  <p style="margin:32px 0"><a href="${url}" style="background:#0D0C0A;color:#F2EDE3;padding:14px 24px;text-decoration:none;font-family:monospace;font-size:14px;letter-spacing:0.05em">Konfirmasi Email →</a></p>
+  <p style="font-size:13px;color:#6B6760;line-height:1.5">Jika kamu tidak pernah mendaftar, abaikan email ini.</p>
 </div>`,
   });
 }
@@ -72,15 +72,15 @@ export async function sendRateEmailToAll(rate: number, changePct: number | null,
         await c.emails.send({
           from: FROM,
           to: sub.email,
-          subject: `USD/IDR ${fmtRupiah(rate)} — Update ${slotLabel}`,
+          subject: `Update ${slotLabel}: USD/IDR Rp${fmtRupiah(rate)}`,
           html: `
 <div style="font-family:Georgia,serif;background:#F2EDE3;color:#0D0C0A;padding:48px 32px;max-width:560px;margin:auto">
-  <div style="font-family:monospace;font-size:11px;letter-spacing:0.2em;color:#6B6760;text-transform:uppercase">${dateStr} · ${slotLabel}</div>
+  <div style="font-family:monospace;font-size:11px;letter-spacing:0.2em;color:#6B6760;text-transform:uppercase">${dateStr} · Update ${slotLabel}</div>
   <div style="font-size:96px;font-style:italic;font-weight:400;line-height:1;margin:16px 0 8px">${fmtRupiah(rate)}</div>
-  <div style="font-family:monospace;font-size:13px;color:#6B6760">IDR per 1 USD ${changeLabel ? `· <span style="color:${changeColor}">${changeLabel}</span> vs update lalu` : ""}</div>
+  <div style="font-family:monospace;font-size:13px;color:#6B6760">Rupiah per 1 US Dollar${changeLabel ? ` · <span style="color:${changeColor}">${changeLabel}</span> dari update sebelumnya` : ""}</div>
   <hr style="border:none;border-top:1px solid #D9D3C6;margin:32px 0"/>
-  <p style="line-height:1.7;font-size:15px;margin:0 0 24px">Buka <a href="${BASE_URL}" style="color:#0D0C0A;text-decoration:underline">usd-to-idr.hanif.app</a> buat lihat chart, berita kebijakan, dan riwayat lengkap.</p>
-  <p style="font-size:12px;color:#6B6760">Update otomatis 09:00, 15:00, 21:00 WIB.</p>
+  <p style="line-height:1.7;font-size:15px;margin:0 0 24px">Lihat grafik historis, berita terkait, dan riwayat update di <a href="${BASE_URL}" style="color:#0D0C0A;text-decoration:underline">usd-to-idr.hanif.app</a>.</p>
+  <p style="font-size:12px;color:#6B6760">Update otomatis setiap pukul 09:00, 15:00, dan 21:00 WIB.</p>
 </div>`,
         });
         sent += 1;

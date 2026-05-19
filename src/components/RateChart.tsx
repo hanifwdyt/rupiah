@@ -52,10 +52,10 @@ export function RateChart() {
           transition={{ duration: 0.8 }}
         >
           <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-bone/50 mb-6">
-            ─ 01 / Pergerakan kurs
+            Grafik Historis
           </div>
           <h2 className="font-serif italic font-normal text-4xl md:text-6xl lg:text-7xl leading-[0.95] mb-12 md:mb-16 max-w-3xl">
-            Garis yang turun pelan,<br />tapi pasti.
+            Pergerakan kurs USD/IDR
           </h2>
         </motion.div>
 
@@ -100,7 +100,7 @@ export function RateChart() {
         >
           {loading || points.length === 0 ? (
             <div className="h-full flex items-center justify-center text-bone/40 font-mono text-xs uppercase tracking-[0.2em]">
-              {loading ? "memuat…" : "data belum tersedia"}
+              {loading ? "Memuat data…" : "Data belum tersedia"}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -160,7 +160,7 @@ export function RateChart() {
         </motion.div>
 
         <p className="mt-8 md:mt-12 font-mono text-[10px] uppercase tracking-[0.25em] text-bone/40 max-w-2xl">
-          Sumber: open.er-api.com (primary) · frankfurter.dev (fallback) · diperbarui setiap jam
+          Sumber data: Yahoo Finance · Diperbarui setiap 15 menit
         </p>
       </div>
     </section>

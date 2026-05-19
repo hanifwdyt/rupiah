@@ -34,20 +34,20 @@ export function NewsList() {
           transition={{ duration: 0.8 }}
         >
           <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-subtle mb-6">
-            ─ 04 / Konteks
+            Berita Terkait
           </div>
           <h2 className="font-serif italic font-normal text-4xl md:text-6xl lg:text-7xl leading-[0.95] mb-12 md:mb-16 max-w-3xl">
-            Berita dan kebijakan<br />di balik angka.
+            Kabar terbaru soal rupiah dan ekonomi
           </h2>
         </motion.div>
 
         {loading ? (
           <div className="text-center py-16 font-mono text-xs text-subtle uppercase tracking-[0.2em]">
-            memuat berita…
+            Memuat berita…
           </div>
         ) : items.length === 0 ? (
           <div className="text-center py-16 font-mono text-xs text-subtle uppercase tracking-[0.2em]">
-            belum ada berita terkurasi
+            Belum ada berita
           </div>
         ) : (
           <div className="grid md:grid-cols-12 gap-8 md:gap-px md:bg-ink/10">
@@ -88,7 +88,7 @@ export function NewsList() {
                     </p>
                   )}
                   <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
-                    Baca selengkapnya <span className="font-serif italic text-base">→</span>
+                    Baca di {it.source} <span className="font-serif italic text-base">→</span>
                   </div>
                 </motion.a>
               );

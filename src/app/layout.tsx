@@ -2,18 +2,18 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Rupiah Tracker — USD/IDR",
+  title: "USD to IDR — Kurs Dollar ke Rupiah Hari Ini",
   description:
-    "Sebuah catatan terbuka soal pelemahan rupiah. Kurs USD/IDR, diperbarui otomatis, dikirim ke lo tiga kali sehari.",
+    "Pantau kurs USD/IDR real-time, grafik historis, dan berita ekonomi terkait. Update otomatis tiga kali sehari.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Rupiah",
+    title: "USD/IDR",
   },
   openGraph: {
-    title: "Rupiah Tracker — USD/IDR",
-    description: "Awareness soal pelemahan rupiah, update otomatis 3x sehari.",
+    title: "USD to IDR — Kurs Dollar ke Rupiah Hari Ini",
+    description: "Pantau kurs USD/IDR real-time, grafik historis, dan berita ekonomi terkait.",
     type: "website",
   },
   icons: {

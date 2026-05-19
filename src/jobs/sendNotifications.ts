@@ -44,18 +44,18 @@ export async function runSendNotifications(opts?: { slot?: Slot }): Promise<{
 
   const directionLabel =
     changePct == null
-      ? "update terbaru"
+      ? "Lihat detail di website."
       : changePct > 0.05
-        ? `rupiah melemah ${fmtPct(changePct)}`
+        ? `Rupiah melemah ${fmtPct(changePct)} dari update sebelumnya.`
         : changePct < -0.05
-          ? `rupiah menguat ${fmtPct(Math.abs(changePct))}`
-          : "stabil";
+          ? `Rupiah menguat ${fmtPct(Math.abs(changePct))} dari update sebelumnya.`
+          : "Stabil dari update sebelumnya.";
 
   const slotGreeting = slot === "morning" ? "Pagi" : slot === "afternoon" ? "Siang" : "Malam";
 
   const payload = {
-    title: `${slotGreeting} · USD/IDR Rp${fmtRupiah(current.rate)}`,
-    body: `${directionLabel} sejak update lalu`,
+    title: `Update ${slotGreeting} · USD/IDR Rp${fmtRupiah(current.rate)}`,
+    body: directionLabel,
     url: process.env.PUBLIC_BASE_URL || "/",
     tag: `rate-${slot}-${new Date().toDateString()}`,
   };

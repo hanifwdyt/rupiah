@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Rupiah Tracker",
-    short_name: "Rupiah",
-    description: "USD/IDR tracker — update tiga kali sehari.",
+    name: "USD to IDR",
+    short_name: "USD/IDR",
+    description: "Kurs USD/IDR real-time, grafik, dan berita ekonomi.",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",

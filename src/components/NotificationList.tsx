@@ -36,20 +36,20 @@ export function NotificationList() {
           transition={{ duration: 0.8 }}
         >
           <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-subtle mb-6">
-            ─ 03 / Riwayat
+            Riwayat Update
           </div>
           <h2 className="font-serif italic font-normal text-4xl md:text-6xl lg:text-7xl leading-[0.95] mb-12 md:mb-16 max-w-3xl">
-            Setiap update,<br />tercatat.
+            Notifikasi yang sudah dikirim
           </h2>
         </motion.div>
 
         {loading ? (
           <div className="text-center py-16 font-mono text-xs text-subtle uppercase tracking-[0.2em]">
-            memuat riwayat…
+            Memuat…
           </div>
         ) : items.length === 0 ? (
           <div className="text-center py-16 font-mono text-xs text-subtle uppercase tracking-[0.2em]">
-            belum ada notifikasi terkirim
+            Belum ada notifikasi
           </div>
         ) : (
           <ul className="divide-y divide-ink/15 border-t border-b border-ink/15">

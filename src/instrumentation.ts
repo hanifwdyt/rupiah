@@ -17,8 +17,8 @@ export async function register() {
 
   const tz = "Asia/Jakarta";
 
-  // Fetch rate every hour
-  cron.schedule("0 * * * *", () => { void runFetchRate(); }, { timezone: tz });
+  // Fetch rate every 15 minutes (Yahoo Finance is real-time so this gives a richer chart)
+  cron.schedule("*/15 * * * *", () => { void runFetchRate(); }, { timezone: tz });
 
   // Crawl news every 6 hours
   cron.schedule("0 */6 * * *", () => { void runCrawlNews(); }, { timezone: tz });
@@ -28,14 +28,17 @@ export async function register() {
   cron.schedule("0 15 * * *", () => { void runSendNotifications({ slot: "afternoon" }); }, { timezone: tz });
   cron.schedule("0 21 * * *", () => { void runSendNotifications({ slot: "night" }); }, { timezone: tz });
 
-  // Kick off an initial fetch on boot if rates table is empty
+  // Kick off an initial fetch + backfill on boot if rates table is sparse
   setTimeout(async () => {
     try {
       const { db, schema } = await import("@/lib/db");
+      const { runBackfillHistory } = await import("@/jobs/backfillHistory");
       const rows = await db.select().from(schema.rates).limit(1);
       if (rows.length === 0) {
         await runFetchRate();
         await runCrawlNews();
+        // Backfill 1 year of daily history for chart
+        await runBackfillHistory("1y", "1d");
       }
     } catch (err) {
       console.error("[instrumentation] initial bootstrap error:", (err as Error).message);

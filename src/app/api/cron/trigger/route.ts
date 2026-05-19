@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { runFetchRate } from "@/jobs/fetchRate";
 import { runCrawlNews } from "@/jobs/crawlNews";
 import { runSendNotifications, type Slot } from "@/jobs/sendNotifications";
+import { runBackfillHistory } from "@/jobs/backfillHistory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,6 +21,12 @@ export async function GET(req: NextRequest) {
     }
     if (job === "crawlNews") {
       const n = await runCrawlNews();
+      return NextResponse.json({ ok: true, job, inserted: n });
+    }
+    if (job === "backfill") {
+      const range = req.nextUrl.searchParams.get("range") || "1y";
+      const interval = req.nextUrl.searchParams.get("interval") || "1d";
+      const n = await runBackfillHistory(range, interval);
       return NextResponse.json({ ok: true, job, inserted: n });
     }
     if (job === "sendNotifications") {

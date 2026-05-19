@@ -8,6 +8,7 @@ type LatestRate = {
   rate: number | null;
   timestamp: number | null;
   changePct: number | null;
+  source?: string;
 };
 
 function useAnimatedNumber(target: number) {
@@ -25,12 +26,38 @@ export function RateHero() {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    fetch("/api/rates/latest")
-      .then((r) => r.json())
-      .then(setData)
-      .catch(() => setData({ rate: null, timestamp: null, changePct: null }));
-    const i = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(i);
+    let cancelled = false;
+
+    async function load() {
+      try {
+        // Latest from DB to get changePct vs yesterday
+        const stored = await fetch("/api/rates/latest").then((r) => r.json());
+        if (cancelled) return;
+        setData(stored);
+      } catch {
+        if (!cancelled) setData({ rate: null, timestamp: null, changePct: null });
+      }
+      // Live rate (real-time from Yahoo) — overrides DB rate if newer
+      try {
+        const live = await fetch("/api/rates/live").then((r) => r.json());
+        if (cancelled || !live?.rate) return;
+        setData((prev) => ({
+          rate: live.rate,
+          timestamp: live.timestamp,
+          changePct: prev?.changePct ?? null,
+          source: live.source,
+        }));
+      } catch {}
+    }
+
+    load();
+    const refreshId = setInterval(load, 60_000); // refresh every minute
+    const tickId = setInterval(() => setNow(new Date()), 1000);
+    return () => {
+      cancelled = true;
+      clearInterval(refreshId);
+      clearInterval(tickId);
+    };
   }, []);
 
   const rate = data?.rate ?? 0;

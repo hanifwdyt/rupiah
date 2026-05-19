@@ -1,26 +1,48 @@
 import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import path from "node:path";
 import fs from "node:fs";
 import * as schema from "@/db/schema";
 
-const dbPath = process.env.DATABASE_PATH || path.join(process.cwd(), "data", "rupiah.db");
-const dbDir = path.dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
-
-const sqlite = new Database(dbPath);
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("foreign_keys = ON");
-
-export const db = drizzle(sqlite, { schema });
 export { schema };
 
-let migrated = false;
+let _db: BetterSQLite3Database<typeof schema> | null = null;
+let _sqlite: Database.Database | null = null;
+let _migrated = false;
+
+function isBuildPhase(): boolean {
+  // Skip DB initialization during Next.js build / page data collection
+  return process.env.NEXT_PHASE === "phase-production-build";
+}
+
+function init() {
+  if (_db) return;
+  if (isBuildPhase()) {
+    // Return a stub that throws — pages should not hit DB at build time
+    throw new Error("DB access during build phase is disallowed. Mark route as force-dynamic.");
+  }
+  const dbPath = process.env.DATABASE_PATH || path.join(process.cwd(), "data", "rupiah.db");
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
+  _sqlite = new Database(dbPath);
+  _sqlite.pragma("journal_mode = WAL");
+  _sqlite.pragma("busy_timeout = 5000");
+  _sqlite.pragma("foreign_keys = ON");
+  _db = drizzle(_sqlite, { schema });
+}
+
+export const db: BetterSQLite3Database<typeof schema> = new Proxy({} as BetterSQLite3Database<typeof schema>, {
+  get(_target, prop) {
+    init();
+    return Reflect.get(_db as object, prop, _db);
+  },
+});
+
 export function ensureMigrated() {
-  if (migrated) return;
-  sqlite.exec(`
+  if (_migrated) return;
+  init();
+  if (!_sqlite) return;
+  _sqlite.exec(`
     CREATE TABLE IF NOT EXISTS rates (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       timestamp INTEGER NOT NULL,
@@ -69,5 +91,5 @@ export function ensureMigrated() {
     );
     CREATE INDEX IF NOT EXISTS notifications_sent_at_idx ON notifications_log(sent_at);
   `);
-  migrated = true;
+  _migrated = true;
 }

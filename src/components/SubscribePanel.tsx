@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 type PushState = "unsupported" | "denied" | "subscribed" | "idle" | "loading";
@@ -18,10 +17,12 @@ function detectIOS(): boolean {
   if (typeof navigator === "undefined") return false;
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window);
 }
-
 function isInStandaloneMode(): boolean {
   if (typeof window === "undefined") return false;
-  return window.matchMedia("(display-mode: standalone)").matches || (window.navigator as { standalone?: boolean }).standalone === true;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as { standalone?: boolean }).standalone === true
+  );
 }
 
 export function SubscribePanel() {
@@ -95,93 +96,83 @@ export function SubscribePanel() {
     }
   }
 
-  return (
-    <section className="px-6 md:px-12 py-20 md:py-32 border-t border-ink/10">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-subtle mb-6">
-            Berlangganan
-          </div>
-          <h2 className="font-serif italic font-normal text-4xl md:text-6xl lg:text-7xl leading-[0.95] mb-12 md:mb-16 max-w-3xl">
-            Update kurs langsung ke perangkat kamu
-          </h2>
-        </motion.div>
+  const pushLabel =
+    push === "subscribed"
+      ? "Notifikasi aktif"
+      : push === "loading"
+        ? "Memproses…"
+        : push === "denied"
+          ? "Izin ditolak browser"
+          : push === "unsupported"
+            ? "Tidak didukung browser"
+            : "Aktifkan notifikasi";
 
-        <div className="grid md:grid-cols-2 gap-px bg-ink/10">
-          {/* Push notification card */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="bg-bone p-8 md:p-12 flex flex-col"
-          >
-            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtle mb-4">
-              Notifikasi Browser
+  return (
+    <section className="px-5 md:px-10 py-10 md:py-14 border-t border-rule">
+      <div className="rule-thick pt-3 mb-8 md:mb-10 flex items-baseline justify-between">
+        <div className="kicker text-red">Langganan</div>
+        <div className="kicker text-faint">Gratis · 3× sehari</div>
+      </div>
+
+      <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
+        <div className="lg:col-span-4">
+          <h3 className="headline text-paper text-3xl md:text-4xl max-w-sm">
+            Berhenti memeriksa kurs setiap saat
+          </h3>
+          <p className="bodycopy text-dim mt-5 max-w-sm">
+            Daftar sekali, dan biarkan kabar terbaru yang menghampiri. Update dikirim setiap pukul
+            09.00, 15.00, dan 21.00 WIB.
+          </p>
+        </div>
+
+        {/* Two subscription "boxes" like a newspaper classified */}
+        <div className="lg:col-span-8 grid md:grid-cols-2 border border-rule">
+          {/* Push */}
+          <div className="p-6 md:p-8 border-b md:border-b-0 md:border-r border-rule flex flex-col">
+            <div className="flex items-baseline justify-between mb-4">
+              <span className="kicker text-faint">Cara 01</span>
+              <span className="kicker text-faint">Browser</span>
             </div>
-            <h3 className="font-serif italic text-2xl md:text-3xl mb-3">Push Notification</h3>
-            <p className="text-sm md:text-base text-ink/70 leading-relaxed mb-8 flex-1">
-              Aktifkan sekali, terima notifikasi otomatis setiap pukul 09:00, 15:00, dan 21:00 WIB
-              tanpa perlu membuka website.
+            <h4 className="headline text-paper text-2xl mb-3">Notifikasi langsung</h4>
+            <p className="bodycopy text-dim text-[15px] flex-1 mb-6">
+              Muncul di perangkat tanpa perlu membuka situs. Berfungsi di Android, desktop, dan
+              iPhone (lewat Add to Home Screen).
             </p>
 
             {isIOS && !isPWA && (
-              <div className="mb-6 p-4 border border-ink/20 bg-bone">
-                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle mb-2">Catatan untuk iOS</div>
-                <p className="text-sm leading-relaxed">
-                  Tap tombol <span className="font-mono">Share</span> di Safari, pilih <span className="font-mono">Add to Home Screen</span>. Buka dari home screen, lalu aktifkan notifikasi.
-                </p>
-              </div>
+              <p className="kicker text-faint leading-relaxed normal-case tracking-normal text-[12px] mb-5 border-l-2 border-red pl-3">
+                <span className="kicker text-red">Untuk iOS — </span>
+                buka menu Share di Safari, pilih <em>Add to Home Screen</em>, lalu aktifkan dari sana.
+              </p>
             )}
 
             <button
               onClick={enablePush}
               disabled={push === "loading" || push === "subscribed" || push === "unsupported"}
-              className={`group flex items-center justify-between border border-ink px-6 py-4 transition-all ${
+              className={`group flex items-center justify-between border px-5 py-3.5 transition-colors ${
                 push === "subscribed"
-                  ? "bg-ink text-bone cursor-default"
+                  ? "bg-paper text-ink border-paper cursor-default"
                   : push === "unsupported" || push === "denied"
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-ink hover:text-bone"
+                    ? "border-rule text-faint opacity-60 cursor-not-allowed"
+                    : "border-paper text-paper hover:bg-paper hover:text-ink"
               }`}
             >
-              <span className="font-mono text-xs uppercase tracking-[0.2em]">
-                {push === "subscribed"
-                  ? "✓ Aktif"
-                  : push === "loading"
-                    ? "Memproses…"
-                    : push === "denied"
-                      ? "Izin ditolak"
-                      : push === "unsupported"
-                        ? "Browser tidak mendukung"
-                        : "Aktifkan"}
-              </span>
+              <span className="kicker">{pushLabel}</span>
               {push !== "subscribed" && push !== "denied" && push !== "unsupported" && (
-                <span className="font-serif italic text-lg group-hover:translate-x-1 transition-transform">→</span>
+                <span className="font-serif text-lg group-hover:translate-x-1 transition-transform">→</span>
               )}
             </button>
-          </motion.div>
+          </div>
 
-          {/* Email subscription card */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-bone p-8 md:p-12 flex flex-col"
-          >
-            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtle mb-4">
-              Email
+          {/* Email */}
+          <div className="p-6 md:p-8 flex flex-col">
+            <div className="flex items-baseline justify-between mb-4">
+              <span className="kicker text-faint">Cara 02</span>
+              <span className="kicker text-faint">Email</span>
             </div>
-            <h3 className="font-serif italic text-2xl md:text-3xl mb-3">Update via Email</h3>
-            <p className="text-sm md:text-base text-ink/70 leading-relaxed mb-8 flex-1">
-              Terima ringkasan kurs ke inbox tiga kali sehari. Konfirmasi alamat email sekali,
-              setelah itu otomatis.
+            <h4 className="headline text-paper text-2xl mb-3">Ringkasan ke inbox</h4>
+            <p className="bodycopy text-dim text-[15px] flex-1 mb-6">
+              Tiga email singkat per hari berisi kurs terbaru. Konfirmasi alamat sekali di awal.
             </p>
             <form onSubmit={submitEmail} className="space-y-3">
               <input
@@ -190,30 +181,32 @@ export function SubscribePanel() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="nama@email.com"
-                className="w-full bg-transparent border-b border-ink/30 focus:border-ink py-3 font-mono text-sm placeholder:text-subtle/60 outline-none transition-colors"
+                className="w-full bg-transparent border-b border-rule focus:border-paper py-3 font-mono text-sm text-paper placeholder:text-faint outline-none transition-colors"
               />
               <button
                 type="submit"
                 disabled={emailState === "loading" || emailState === "sent"}
-                className={`group w-full flex items-center justify-between border border-ink px-6 py-4 transition-all ${
-                  emailState === "sent" ? "bg-ink text-bone cursor-default" : "hover:bg-ink hover:text-bone"
+                className={`group w-full flex items-center justify-between border px-5 py-3.5 transition-colors ${
+                  emailState === "sent"
+                    ? "bg-paper text-ink border-paper cursor-default"
+                    : "border-paper text-paper hover:bg-paper hover:text-ink"
                 }`}
               >
-                <span className="font-mono text-xs uppercase tracking-[0.2em]">
+                <span className="kicker">
                   {emailState === "loading"
                     ? "Mengirim…"
                     : emailState === "sent"
-                      ? "✓ Cek inbox kamu"
+                      ? "Cek inbox kamu"
                       : emailState === "error"
-                        ? "Gagal, coba lagi"
+                        ? "Gagal — coba lagi"
                         : "Daftar"}
                 </span>
                 {emailState === "idle" && (
-                  <span className="font-serif italic text-lg group-hover:translate-x-1 transition-transform">→</span>
+                  <span className="font-serif text-lg group-hover:translate-x-1 transition-transform">→</span>
                 )}
               </button>
             </form>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

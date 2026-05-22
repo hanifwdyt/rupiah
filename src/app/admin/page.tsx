@@ -129,20 +129,20 @@ export default function AdminPage() {
           }}
           className="w-full max-w-sm space-y-4"
         >
-          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-subtle">Admin Access</div>
-          <h1 className="font-serif italic text-4xl">Masukkan admin key</h1>
+          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-faint">Admin Access</div>
+          <h1 className="headline text-4xl">Masukkan admin key</h1>
           <input
             type="password"
             value={adminKey}
             onChange={(e) => setAdminKey(e.target.value)}
             placeholder="admin key"
-            className="w-full bg-transparent border-b border-ink/30 focus:border-ink py-3 font-mono text-sm outline-none"
+            className="w-full bg-transparent border-b border-rule focus:border-paper py-3 font-mono text-sm outline-none"
           />
-          {error && <p className="font-mono text-xs text-crimson">{error}</p>}
+          {error && <p className="font-mono text-xs text-red">{error}</p>}
           <button
             type="submit"
             disabled={loading}
-            className="w-full border border-ink py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-ink hover:text-bone transition-colors"
+            className="w-full border border-paperpy-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-paper hover:text-ink transition-colors"
           >
             {loading ? "Memuat…" : "Masuk →"}
           </button>
@@ -152,20 +152,20 @@ export default function AdminPage() {
   }
 
   if (!data) {
-    return <div className="p-12 font-mono text-xs text-subtle">Memuat…</div>;
+    return <div className="p-12 font-mono text-xs text-faint">Memuat…</div>;
   }
 
   return (
     <main className="min-h-screen px-6 md:px-12 py-12 md:py-16 max-w-6xl mx-auto">
-      <header className="flex items-baseline justify-between mb-12 md:mb-16 border-b border-ink/10 pb-6">
+      <header className="flex items-baseline justify-between mb-12 md:mb-16 border-b border-rule pb-6">
         <div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-subtle mb-2">Admin</div>
-          <h1 className="font-serif italic text-4xl md:text-5xl">Dashboard</h1>
+          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-faint mb-2">Admin</div>
+          <h1 className="headline text-4xl md:text-5xl">Dashboard</h1>
         </div>
         <button
           onClick={() => load(adminKey)}
           disabled={loading}
-          className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle hover:text-ink"
+          className="font-mono text-[10px] uppercase tracking-[0.2em] text-faint hover:text-paper"
         >
           {loading ? "Memuat…" : "↻ Refresh"}
         </button>
@@ -182,10 +182,10 @@ export default function AdminPage() {
 
       {/* Manual trigger */}
       <section className="mb-16 md:mb-20">
-        <h2 className="font-serif italic text-3xl mb-6">Kirim notifikasi sekarang</h2>
+        <h2 className="headline text-3xl mb-6">Kirim notifikasi sekarang</h2>
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtle">
+            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-faint">
               Mode otomatis (rate + delta dari log terakhir)
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -194,7 +194,7 @@ export default function AdminPage() {
                   key={s}
                   onClick={() => runScheduled(s)}
                   disabled={sending}
-                  className="border border-ink py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-ink hover:text-bone transition-colors disabled:opacity-40"
+                  className="border border-paperpy-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-paper hover:text-ink transition-colors disabled:opacity-40"
                 >
                   {slotLabel(s)}
                 </button>
@@ -203,14 +203,14 @@ export default function AdminPage() {
             <button
               onClick={() => runScheduled()}
               disabled={sending}
-              className="w-full border border-ink py-3 font-mono text-xs uppercase tracking-[0.2em] bg-ink text-bone hover:opacity-80 disabled:opacity-40"
+              className="w-full border border-paperpy-3 font-mono text-xs uppercase tracking-[0.2em] bg-paper text-ink hover:opacity-80 disabled:opacity-40"
             >
               Auto slot (ikut jam sekarang)
             </button>
           </div>
 
           <form onSubmit={sendCustom} className="space-y-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtle">
+            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-faint">
               Mode custom (push only, ga simpan log)
             </div>
             <input
@@ -218,7 +218,7 @@ export default function AdminPage() {
               value={pushTitle}
               onChange={(e) => setPushTitle(e.target.value)}
               placeholder="Judul"
-              className="w-full bg-transparent border-b border-ink/30 focus:border-ink py-2 font-mono text-sm outline-none"
+              className="w-full bg-transparent border-b border-rule focus:border-paper py-2 font-mono text-sm outline-none"
             />
             <textarea
               value={pushBody}
@@ -226,19 +226,19 @@ export default function AdminPage() {
               placeholder="Pesan"
               rows={3}
               required
-              className="w-full bg-transparent border border-ink/30 focus:border-ink p-3 font-mono text-sm outline-none resize-none"
+              className="w-full bg-transparent border border-rule focus:border-paper p-3 font-mono text-sm outline-none resize-none"
             />
             <button
               type="submit"
               disabled={sending || !pushBody}
-              className="w-full border border-ink py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-ink hover:text-bone transition-colors disabled:opacity-40"
+              className="w-full border border-paper py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-paper hover:text-ink transition-colors disabled:opacity-40"
             >
               Kirim push custom
             </button>
           </form>
         </div>
         {sendResult && (
-          <div className="mt-4 font-mono text-xs text-subtle">
+          <div className="mt-4 font-mono text-xs text-faint">
             {sendResult}
           </div>
         )}
@@ -247,22 +247,22 @@ export default function AdminPage() {
       {/* Email subscribers */}
       <section className="mb-16 md:mb-20">
         <div className="flex items-baseline justify-between mb-6">
-          <h2 className="font-serif italic text-3xl">Email subscribers</h2>
-          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtle">
+          <h2 className="headline text-3xl">Email subscribers</h2>
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-faint">
             {data.emailSubscriptions.length} total
           </span>
         </div>
         {data.emailSubscriptions.length === 0 ? (
-          <div className="font-mono text-xs text-subtle py-8">Belum ada email subscriber.</div>
+          <div className="font-mono text-xs text-faint py-8">Belum ada email subscriber.</div>
         ) : (
-          <div className="border-t border-b border-ink/15 divide-y divide-ink/10">
+          <div className="border-t border-b border-rule divide-y divide-rule">
             {data.emailSubscriptions.map((e) => (
               <div key={e.id} className="grid grid-cols-12 gap-4 py-3 items-baseline">
                 <span className="col-span-7 md:col-span-7 font-mono text-sm truncate">{e.email}</span>
                 <span className="col-span-3 md:col-span-2 font-mono text-[10px] uppercase tracking-[0.2em]">
-                  {e.verified ? <span className="text-[#2F5D40]">✓ verified</span> : <span className="text-crimson">unverified</span>}
+                  {e.verified ? <span className="text-green">✓ verified</span> : <span className="text-red">unverified</span>}
                 </span>
-                <span className="col-span-2 md:col-span-3 font-mono text-[10px] text-subtle text-right md:text-left">
+                <span className="col-span-2 md:col-span-3 font-mono text-[10px] text-faint text-right md:text-left">
                   {fmtDateJakarta(e.createdAt, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
@@ -274,23 +274,23 @@ export default function AdminPage() {
       {/* Push subscribers */}
       <section className="mb-16 md:mb-20">
         <div className="flex items-baseline justify-between mb-6">
-          <h2 className="font-serif italic text-3xl">Push subscribers</h2>
-          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtle">
+          <h2 className="headline text-3xl">Push subscribers</h2>
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-faint">
             {data.pushSubscriptions.length} total
           </span>
         </div>
         {data.pushSubscriptions.length === 0 ? (
-          <div className="font-mono text-xs text-subtle py-8">Belum ada push subscriber.</div>
+          <div className="font-mono text-xs text-faint py-8">Belum ada push subscriber.</div>
         ) : (
-          <div className="border-t border-b border-ink/15 divide-y divide-ink/10">
+          <div className="border-t border-b border-rule divide-y divide-rule">
             {data.pushSubscriptions.map((p) => (
               <div key={p.id} className="grid grid-cols-12 gap-4 py-3 items-baseline">
-                <span className="col-span-1 font-mono text-xs text-subtle">#{p.id}</span>
+                <span className="col-span-1 font-mono text-xs text-faint">#{p.id}</span>
                 <span className="col-span-6 font-mono text-sm truncate">{p.endpointDomain}</span>
                 <span className="col-span-2 font-mono text-[10px] uppercase tracking-[0.2em]">
-                  {p.active ? <span className="text-[#2F5D40]">active</span> : <span className="text-subtle">inactive</span>}
+                  {p.active ? <span className="text-green">active</span> : <span className="text-faint">inactive</span>}
                 </span>
-                <span className="col-span-3 font-mono text-[10px] text-subtle text-right md:text-left">
+                <span className="col-span-3 font-mono text-[10px] text-faint text-right md:text-left">
                   {fmtDateJakarta(p.createdAt, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
@@ -301,30 +301,30 @@ export default function AdminPage() {
 
       {/* Recent notifications */}
       <section>
-        <h2 className="font-serif italic text-3xl mb-6">20 notifikasi terakhir</h2>
+        <h2 className="headline text-3xl mb-6">20 notifikasi terakhir</h2>
         {data.recentNotifications.length === 0 ? (
-          <div className="font-mono text-xs text-subtle py-8">Belum ada notifikasi terkirim.</div>
+          <div className="font-mono text-xs text-faint py-8">Belum ada notifikasi terkirim.</div>
         ) : (
-          <div className="border-t border-b border-ink/15 divide-y divide-ink/10">
+          <div className="border-t border-b border-rule divide-y divide-rule">
             {data.recentNotifications.map((n) => (
               <div key={n.id} className="grid grid-cols-12 gap-2 py-3 items-baseline font-mono text-sm">
-                <span className="col-span-3 text-[11px] text-subtle">
+                <span className="col-span-3 text-[11px] text-faint">
                   {fmtDateJakarta(n.sentAt, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </span>
-                <span className="col-span-2 text-[11px] uppercase tracking-[0.15em] text-subtle">{slotLabel(n.slot)}</span>
-                <span className="col-span-3 font-serif italic text-lg">Rp{fmtRupiah(n.rate)}</span>
-                <span className={`col-span-1 text-xs ${n.rateChangePct == null ? "text-subtle" : n.rateChangePct > 0 ? "text-crimson" : "text-[#2F5D40]"}`}>
+                <span className="col-span-2 text-[11px] uppercase tracking-[0.15em] text-faint">{slotLabel(n.slot)}</span>
+                <span className="col-span-3 headline text-lg">Rp{fmtRupiah(n.rate)}</span>
+                <span className={`col-span-1 text-xs ${n.rateChangePct == null ? "text-faint" : n.rateChangePct > 0 ? "text-red" : "text-green"}`}>
                   {n.rateChangePct != null ? fmtPct(n.rateChangePct) : "—"}
                 </span>
-                <span className="col-span-2 text-[11px] text-subtle">push: {n.pushSentCount}</span>
-                <span className="col-span-1 text-[11px] text-subtle">mail: {n.emailSentCount}</span>
+                <span className="col-span-2 text-[11px] text-faint">push: {n.pushSentCount}</span>
+                <span className="col-span-1 text-[11px] text-faint">mail: {n.emailSentCount}</span>
               </div>
             ))}
           </div>
         )}
       </section>
 
-      <footer className="mt-20 pt-8 border-t border-ink/10 flex justify-between font-mono text-[10px] uppercase tracking-[0.25em] text-subtle">
+      <footer className="mt-20 pt-8 border-t border-rule flex justify-between font-mono text-[10px] uppercase tracking-[0.25em] text-faint">
         <span>Rupiah Tracker · Admin</span>
         <button
           onClick={() => {
@@ -345,8 +345,8 @@ export default function AdminPage() {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtle mb-2">{label}</div>
-      <div className="font-serif italic text-4xl md:text-5xl tabular-nums">{value.toLocaleString("id-ID")}</div>
+      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-faint mb-2">{label}</div>
+      <div className="headline text-4xl md:text-5xl tabular-nums">{value.toLocaleString("id-ID")}</div>
     </div>
   );
 }

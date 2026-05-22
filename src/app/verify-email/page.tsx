@@ -12,7 +12,7 @@ export default async function VerifyEmailPage({
   const map: Record<string, { title: string; body: string }> = {
     ok: {
       title: "Email terkonfirmasi",
-      body: "Update kurs USD/IDR akan dikirim ke inbox kamu setiap pukul 09:00, 15:00, dan 21:00 WIB.",
+      body: "Update kurs USD/IDR akan dikirim ke inbox kamu setiap pukul 09.00, 15.00, dan 21.00 WIB.",
     },
     invalid: {
       title: "Link tidak valid",
@@ -27,22 +27,16 @@ export default async function VerifyEmailPage({
   const content = map[status || ""] ?? map.error;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 md:px-12 text-center">
-      <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-subtle mb-6">
-        Verifikasi Email
-      </div>
-      <h1 className="font-serif italic text-5xl md:text-7xl leading-[0.95] max-w-2xl mb-8">
-        {content.title}
-      </h1>
-      <p className="max-w-md text-base md:text-lg text-ink/70 leading-relaxed mb-12">
-        {content.body}
-      </p>
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center mx-auto max-w-[1400px] border-x border-rule">
+      <div className="kicker text-red mb-6">Rupiah Watch · Verifikasi</div>
+      <h1 className="headline text-paper text-5xl md:text-7xl max-w-2xl mb-6">{content.title}</h1>
+      <p className="bodycopy text-dim max-w-md mb-10">{content.body}</p>
       <Link
         href="/"
-        className="group inline-flex items-center gap-3 border border-ink px-8 py-4 hover:bg-ink hover:text-bone transition-all"
+        className="group inline-flex items-center gap-3 border border-paper text-paper px-7 py-3.5 hover:bg-paper hover:text-ink transition-colors"
       >
-        <span className="font-mono text-xs uppercase tracking-[0.2em]">Kembali ke beranda</span>
-        <span className="font-serif italic text-lg group-hover:translate-x-1 transition-transform">→</span>
+        <span className="kicker">Kembali ke beranda</span>
+        <span className="font-serif text-lg group-hover:translate-x-1 transition-transform">→</span>
       </Link>
     </main>
   );

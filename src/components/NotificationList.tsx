@@ -27,110 +27,94 @@ export function NotificationList() {
   }, []);
 
   return (
-    <section className="px-6 md:px-12 py-20 md:py-32 border-t border-ink/10">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-subtle mb-6">
-            Riwayat Update
-          </div>
-          <h2 className="font-serif italic font-normal text-4xl md:text-6xl lg:text-7xl leading-[0.95] mb-12 md:mb-16 max-w-3xl">
-            Notifikasi yang sudah dikirim
-          </h2>
-        </motion.div>
+    <section className="px-5 md:px-10 py-10 md:py-14 border-t border-rule">
+      <div className="rule-thick pt-3 mb-8 md:mb-10 flex items-baseline justify-between">
+        <div className="kicker text-red">Catatan · Riwayat Kirim</div>
+        <div className="kicker text-faint">09.00 · 15.00 · 21.00 WIB</div>
+      </div>
 
-        {loading ? (
-          <div className="text-center py-16 font-mono text-xs text-subtle uppercase tracking-[0.2em]">
-            Memuat…
-          </div>
-        ) : items.length === 0 ? (
-          <div className="text-center py-16 font-mono text-xs text-subtle uppercase tracking-[0.2em]">
-            Belum ada notifikasi
-          </div>
-        ) : (
-          <ul className="divide-y divide-ink/15 border-t border-b border-ink/15">
-            {items.map((it, idx) => {
-              const isOpen = expanded === it.id;
-              const change = it.rateChangePct;
-              const dir = change == null ? "neutral" : change > 0.05 ? "down" : change < -0.05 ? "up" : "neutral";
-              return (
-                <motion.li
-                  key={it.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: Math.min(idx * 0.03, 0.4) }}
-                >
-                  <button
-                    onClick={() => setExpanded(isOpen ? null : it.id)}
-                    className="w-full flex items-center justify-between gap-4 py-5 md:py-6 text-left group"
-                  >
-                    <div className="flex items-baseline gap-4 md:gap-8 min-w-0 flex-1">
-                      <span className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-subtle w-20 md:w-32 shrink-0">
+      <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
+        <div className="lg:col-span-3">
+          <h3 className="headline text-paper text-3xl md:text-4xl max-w-xs">
+            Setiap notifikasi yang pernah dikirim
+          </h3>
+          <p className="bodycopy text-dim mt-5 text-[15px] max-w-xs">
+            Arsip lengkap pengiriman update kurs, beserta jumlah penerima di tiap kanal.
+          </p>
+        </div>
+
+        <div className="lg:col-span-9">
+          {loading ? (
+            <div className="kicker text-faint py-12">Memuat riwayat</div>
+          ) : items.length === 0 ? (
+            <div className="kicker text-faint py-12">Belum ada notifikasi terkirim</div>
+          ) : (
+            <ul className="border-t border-rule">
+              {items.map((it) => {
+                const isOpen = expanded === it.id;
+                const change = it.rateChangePct;
+                const dir =
+                  change == null ? "flat" : change > 0.02 ? "down" : change < -0.02 ? "up" : "flat";
+                return (
+                  <li key={it.id} className="border-b border-rule">
+                    <button
+                      onClick={() => setExpanded(isOpen ? null : it.id)}
+                      className="w-full flex items-center gap-4 md:gap-8 py-4 md:py-5 text-left group"
+                    >
+                      <span className="font-mono text-[11px] text-faint w-20 md:w-28 shrink-0 tabular-nums">
                         {fmtDateJakarta(it.sentAt, { day: "2-digit", month: "short" })}
                       </span>
-                      <span className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-subtle w-16 shrink-0">
-                        {slotLabel(it.slot)}
-                      </span>
-                      <span className="font-serif italic text-xl md:text-3xl truncate">
+                      <span className="kicker text-faint w-14 shrink-0">{slotLabel(it.slot)}</span>
+                      <span className="font-serif text-paper text-xl md:text-2xl flex-1 tabular-nums">
                         Rp{fmtRupiah(it.rate)}
                       </span>
-                    </div>
-                    <div className="flex items-center gap-4 md:gap-6 shrink-0">
-                      {change != null && (
-                        <span
-                          className={`font-mono text-xs md:text-sm ${
-                            dir === "down" ? "text-crimson" : dir === "up" ? "text-[#2F5D40]" : "text-subtle"
-                          }`}
-                        >
-                          {fmtPct(change)}
-                        </span>
-                      )}
-                      <span className={`font-serif text-2xl transition-transform ${isOpen ? "rotate-45" : ""}`}>+</span>
-                    </div>
-                  </button>
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                        className="overflow-hidden"
+                      <span
+                        className={`font-mono text-xs md:text-sm shrink-0 ${
+                          dir === "down" ? "text-red" : dir === "up" ? "text-green" : "text-faint"
+                        }`}
                       >
-                        <div className="pb-6 md:pb-8 pl-0 md:pl-44 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-                          <div>
-                            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle mb-1">Waktu</div>
-                            <div className="font-mono">
-                              {fmtDateJakarta(it.sentAt, { hour: "2-digit", minute: "2-digit" })} WIB
-                            </div>
+                        {change != null ? fmtPct(change) : "—"}
+                      </span>
+                      <span
+                        className={`font-serif text-xl text-dim shrink-0 transition-transform ${isOpen ? "rotate-45" : ""}`}
+                      >
+                        +
+                      </span>
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <div className="pb-5 pl-0 md:pl-[8.5rem] grid grid-cols-2 md:grid-cols-4 gap-5">
+                            <Field label="Waktu" value={`${fmtDateJakarta(it.sentAt, { hour: "2-digit", minute: "2-digit" })} WIB`} />
+                            <Field label="Push" value={String(it.pushSentCount)} />
+                            <Field label="Email" value={String(it.emailSentCount)} />
+                            <Field label="Slot" value={slotLabel(it.slot)} />
                           </div>
-                          <div>
-                            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle mb-1">Push terkirim</div>
-                            <div className="font-mono">{it.pushSentCount}</div>
-                          </div>
-                          <div>
-                            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle mb-1">Email terkirim</div>
-                            <div className="font-mono">{it.emailSentCount}</div>
-                          </div>
-                          <div>
-                            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle mb-1">Slot</div>
-                            <div className="font-mono">{slotLabel(it.slot)}</div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.li>
-              );
-            })}
-          </ul>
-        )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </div>
     </section>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div className="kicker text-faint mb-1">{label}</div>
+      <div className="font-mono text-sm text-paper">{value}</div>
+    </div>
   );
 }

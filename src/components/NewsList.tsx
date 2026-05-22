@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { fmtDateJakarta } from "@/lib/format";
 
@@ -13,89 +12,111 @@ type NewsItem = {
   publishedAt: number;
 };
 
+function relativeTime(ts: number): string {
+  const diff = Date.now() - ts;
+  const h = Math.floor(diff / 3_600_000);
+  if (h < 1) return "baru saja";
+  if (h < 24) return `${h} jam lalu`;
+  const d = Math.floor(h / 24);
+  return `${d} hari lalu`;
+}
+
 export function NewsList() {
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [limit, setLimit] = useState(12);
 
   useEffect(() => {
-    fetch("/api/news?limit=30")
+    fetch("/api/news?limit=40")
       .then((r) => r.json())
       .then((data) => setItems(data.items || []))
       .finally(() => setLoading(false));
   }, []);
 
-  return (
-    <section className="px-6 md:px-12 py-20 md:py-32 border-t border-ink/10">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-subtle mb-6">
-            Berita Terkait
-          </div>
-          <h2 className="font-serif italic font-normal text-4xl md:text-6xl lg:text-7xl leading-[0.95] mb-12 md:mb-16 max-w-3xl">
-            Kabar terbaru soal rupiah dan ekonomi
-          </h2>
-        </motion.div>
+  const visible = items.slice(0, limit);
+  const lead = visible[0];
+  const rest = visible.slice(1);
 
-        {loading ? (
-          <div className="text-center py-16 font-mono text-xs text-subtle uppercase tracking-[0.2em]">
-            Memuat berita…
-          </div>
-        ) : items.length === 0 ? (
-          <div className="text-center py-16 font-mono text-xs text-subtle uppercase tracking-[0.2em]">
-            Belum ada berita
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-12 gap-8 md:gap-px md:bg-ink/10">
-            {items.map((it, idx) => {
-              const isFeatured = idx === 0;
-              return (
-                <motion.a
-                  key={it.id}
+  return (
+    <section className="px-5 md:px-10 py-10 md:py-14 border-t border-rule">
+      <div className="rule-thick pt-3 mb-8 md:mb-10 flex items-baseline justify-between">
+        <div className="kicker text-red">Berita Terkait</div>
+        <div className="kicker text-faint">Diperbarui tiap 6 jam</div>
+      </div>
+
+      {loading ? (
+        <div className="kicker text-faint py-12">Memuat berita</div>
+      ) : items.length === 0 ? (
+        <div className="kicker text-faint py-12">Belum ada berita terkurasi</div>
+      ) : (
+        <>
+          {/* Lead story */}
+          {lead && (
+            <a
+              href={lead.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block border-b border-rule pb-8 mb-8"
+            >
+              <div className="grid lg:grid-cols-12 gap-4 lg:gap-10 items-baseline">
+                <div className="lg:col-span-2">
+                  <div className="kicker text-faint">{lead.source}</div>
+                  <div className="kicker text-faint mt-1">{relativeTime(lead.publishedAt)}</div>
+                </div>
+                <div className="lg:col-span-10">
+                  <h3 className="headline text-paper text-3xl md:text-5xl leading-[1.02] group-hover:text-red transition-colors max-w-4xl">
+                    {lead.title}
+                  </h3>
+                  {lead.excerpt && (
+                    <p className="bodycopy text-dim mt-4 max-w-2xl">{lead.excerpt}</p>
+                  )}
+                </div>
+              </div>
+            </a>
+          )}
+
+          {/* Index list */}
+          <ol className="border-t border-rule">
+            {rest.map((it, i) => (
+              <li key={it.id} className="border-b border-rule">
+                <a
                   href={it.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: Math.min(idx * 0.04, 0.6) }}
-                  className={`group block bg-bone p-6 md:p-8 hover:bg-ink hover:text-bone transition-colors duration-300 ${
-                    isFeatured ? "md:col-span-12 md:p-12" : "md:col-span-6 lg:col-span-4"
-                  }`}
+                  className="group grid grid-cols-12 gap-3 md:gap-6 py-5 items-baseline"
                 >
-                  <div className="flex items-center justify-between mb-4 md:mb-6 font-mono text-[10px] uppercase tracking-[0.25em] opacity-60">
-                    <span>{it.source}</span>
-                    <span>{fmtDateJakarta(it.publishedAt, { day: "numeric", month: "short" })}</span>
+                  <span className="col-span-2 md:col-span-1 font-mono text-sm text-faint tabular-nums">
+                    {String(i + 2).padStart(2, "0")}
+                  </span>
+                  <div className="col-span-10 md:col-span-8">
+                    <h4 className="font-serif text-paper text-lg md:text-2xl leading-snug group-hover:text-red transition-colors">
+                      {it.title}
+                    </h4>
+                    {it.excerpt && (
+                      <p className="bodycopy text-faint text-[14px] mt-1.5 line-clamp-2 md:hidden lg:block max-w-2xl">
+                        {it.excerpt}
+                      </p>
+                    )}
                   </div>
-                  <h3
-                    className={`font-serif italic leading-[1.1] ${
-                      isFeatured ? "text-3xl md:text-5xl lg:text-6xl mb-6 md:mb-8" : "text-xl md:text-2xl mb-4"
-                    }`}
-                  >
-                    {it.title}
-                  </h3>
-                  {it.excerpt && (
-                    <p
-                      className={`leading-relaxed opacity-80 ${
-                        isFeatured ? "text-base md:text-lg max-w-3xl" : "text-sm line-clamp-3"
-                      }`}
-                    >
-                      {it.excerpt}
-                    </p>
-                  )}
-                  <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
-                    Baca di {it.source} <span className="font-serif italic text-base">→</span>
+                  <div className="hidden md:block md:col-span-3 text-right">
+                    <div className="kicker text-faint">{it.source}</div>
+                    <div className="kicker text-faint mt-1">{relativeTime(it.publishedAt)}</div>
                   </div>
-                </motion.a>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                </a>
+              </li>
+            ))}
+          </ol>
+
+          {limit < items.length && (
+            <button
+              onClick={() => setLimit((l) => l + 12)}
+              className="mt-8 kicker text-dim hover:text-paper border border-rule hover:border-paper px-5 py-3 transition-colors"
+            >
+              Muat lebih banyak ({items.length - limit})
+            </button>
+          )}
+        </>
+      )}
     </section>
   );
 }

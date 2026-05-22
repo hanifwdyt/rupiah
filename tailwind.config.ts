@@ -8,23 +8,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bone: "#F2EDE3",
-        ink: "#0D0C0A",
-        crimson: "#8B2A1A",
-        gold: "#B8893A",
-        subtle: "#6B6760",
-        faint: "#D9D3C6",
+        // Night-edition broadsheet
+        ink: "#13110D", // page background, warm near-black
+        ink2: "#1A1712", // panels / inset blocks
+        paper: "#ECE7DB", // primary text, warm off-white
+        dim: "#A39C8C", // secondary text
+        faint: "#6E6757", // tertiary / muted labels
+        rule: "#2C2922", // hairline rule color (solid)
+        red: "#E2483D", // alarm / rupiah weakening / accent
+        green: "#5FB98A", // rupiah strengthening
       },
       fontFamily: {
         serif: ["var(--font-serif)", "Georgia", "serif"],
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
-      fontSize: {
-        hero: "clamp(72px, 14vw, 220px)",
-      },
-      animation: {
-        "pulse-slow": "pulse 3s ease-in-out infinite",
+      letterSpacing: {
+        kicker: "0.22em",
       },
     },
   },

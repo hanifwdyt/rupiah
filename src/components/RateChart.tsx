@@ -1,25 +1,32 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceDot,
+} from "recharts";
 import { fmtRupiah, fmtDateJakarta } from "@/lib/format";
 
 type Range = "1d" | "1w" | "1m" | "3m" | "6m" | "1y";
 
 const RANGES: { value: Range; label: string }[] = [
-  { value: "1d", label: "24J" },
-  { value: "1w", label: "7H" },
-  { value: "1m", label: "1B" },
-  { value: "3m", label: "3B" },
-  { value: "6m", label: "6B" },
-  { value: "1y", label: "1T" },
+  { value: "1d", label: "24 Jam" },
+  { value: "1w", label: "Pekan" },
+  { value: "1m", label: "Bulan" },
+  { value: "3m", label: "3 Bln" },
+  { value: "6m", label: "6 Bln" },
+  { value: "1y", label: "Tahun" },
 ];
 
 type Point = { timestamp: number; rate: number };
 
 export function RateChart() {
-  const [range, setRange] = useState<Range>("1m");
+  const [range, setRange] = useState<Range>("1y");
   const [points, setPoints] = useState<Point[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,147 +39,199 @@ export function RateChart() {
   }, [range]);
 
   const stats = useMemo(() => {
-    if (points.length === 0) return null;
-    const rates = points.map((p) => p.rate);
-    const min = Math.min(...rates);
-    const max = Math.max(...rates);
-    const first = rates[0];
-    const last = rates[rates.length - 1];
+    if (points.length < 2) return null;
+    let maxP = points[0];
+    let minP = points[0];
+    for (const p of points) {
+      if (p.rate > maxP.rate) maxP = p;
+      if (p.rate < minP.rate) minP = p;
+    }
+    const first = points[0].rate;
+    const last = points[points.length - 1].rate;
     const change = ((last - first) / first) * 100;
-    return { min, max, first, last, change };
+    return { maxP, minP, first, last, change };
   }, [points]);
 
-  return (
-    <section className="bg-ink text-bone py-20 md:py-32 px-6 md:px-12 relative overflow-hidden">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-bone/50 mb-6">
-            Grafik Historis
-          </div>
-          <h2 className="font-serif italic font-normal text-4xl md:text-6xl lg:text-7xl leading-[0.95] mb-12 md:mb-16 max-w-3xl">
-            Pergerakan kurs USD/IDR
-          </h2>
-        </motion.div>
+  const rangeNote =
+    range === "1y" ? "12 bulan terakhir" : range === "1d" ? "24 jam terakhir" : "periode terpilih";
 
-        {/* range selector */}
-        <div className="flex flex-wrap gap-2 mb-8 md:mb-12">
-          {RANGES.map((r) => (
-            <button
-              key={r.value}
-              onClick={() => setRange(r.value)}
-              className={`font-mono text-xs px-4 py-2 border transition-all ${
-                range === r.value
-                  ? "bg-bone text-ink border-bone"
-                  : "border-bone/20 text-bone/60 hover:border-bone/60 hover:text-bone"
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
+  return (
+    <section className="px-5 md:px-10 py-10 md:py-14 border-t border-rule">
+      {/* section header */}
+      <div className="rule-thick pt-3 mb-8 md:mb-10 flex items-baseline justify-between">
+        <div className="kicker text-red">Grafik · Pergerakan</div>
+        <div className="kicker text-faint">{rangeNote}</div>
+      </div>
+
+      <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
+        {/* Left rail: headline + stats */}
+        <div className="lg:col-span-3">
+          <h3 className="headline text-paper text-3xl md:text-4xl mb-6 max-w-xs">
+            Jejak nilai tukar dari waktu ke waktu
+          </h3>
+          {stats && (
+            <dl className="space-y-4 border-t border-rule pt-5">
+              <StatRow label="Tertinggi" value={`Rp${fmtRupiah(stats.maxP.rate)}`} />
+              <StatRow label="Terendah" value={`Rp${fmtRupiah(stats.minP.rate)}`} />
+              <StatRow label="Awal periode" value={`Rp${fmtRupiah(stats.first)}`} />
+              <StatRow
+                label="Perubahan"
+                value={`${stats.change >= 0 ? "+" : ""}${stats.change.toFixed(2)}%`}
+                accent={stats.change >= 0 ? "down" : "up"}
+              />
+            </dl>
+          )}
         </div>
 
-        {/* stats row */}
-        {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 mb-8 md:mb-12">
-            <Stat label="Tertinggi" value={fmtRupiah(stats.max)} />
-            <Stat label="Terendah" value={fmtRupiah(stats.min)} />
-            <Stat label="Awal periode" value={fmtRupiah(stats.first)} />
-            <Stat
-              label="Perubahan"
-              value={`${stats.change >= 0 ? "+" : ""}${stats.change.toFixed(2)}%`}
-              accent={stats.change >= 0 ? "down" : "up"}
-            />
+        {/* Chart */}
+        <div className="lg:col-span-9">
+          {/* range selector */}
+          <div className="flex flex-wrap gap-0 mb-6 border border-rule w-fit">
+            {RANGES.map((r, i) => (
+              <button
+                key={r.value}
+                onClick={() => setRange(r.value)}
+                className={`kicker px-3.5 py-2 transition-colors ${i > 0 ? "border-l border-rule" : ""} ${
+                  range === r.value ? "bg-paper text-ink" : "text-dim hover:text-paper"
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
           </div>
-        )}
 
-        {/* chart */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-          className="h-[360px] md:h-[480px] -mx-2 md:mx-0"
-        >
-          {loading || points.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-bone/40 font-mono text-xs uppercase tracking-[0.2em]">
-              {loading ? "Memuat data…" : "Data belum tersedia"}
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={points} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
-                <XAxis
-                  dataKey="timestamp"
-                  tickFormatter={(t) => fmtDateJakarta(t, range === "1d" ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "short" })}
-                  stroke="#6B6760"
-                  tick={{ fill: "#9B968A", fontFamily: "var(--font-mono)", fontSize: 10 }}
-                  axisLine={{ stroke: "#2A2724" }}
-                  tickLine={false}
-                  minTickGap={40}
-                />
-                <YAxis
-                  domain={["dataMin - 50", "dataMax + 50"]}
-                  tickFormatter={(v) => fmtRupiah(v)}
-                  stroke="#6B6760"
-                  tick={{ fill: "#9B968A", fontFamily: "var(--font-mono)", fontSize: 10 }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={60}
-                />
-                {stats && (
-                  <ReferenceLine
-                    y={stats.first}
-                    stroke="#6B6760"
-                    strokeDasharray="2 4"
-                    strokeWidth={1}
+          <div className="h-[340px] md:h-[460px] -mx-2 md:mx-0">
+            {loading || points.length < 2 ? (
+              <div className="h-full flex items-center justify-center kicker text-faint">
+                {loading ? "Memuat data" : "Data belum tersedia"}
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={points} margin={{ top: 28, right: 16, left: 4, bottom: 8 }}>
+                  <XAxis
+                    dataKey="timestamp"
+                    tickFormatter={(t) =>
+                      fmtDateJakarta(
+                        t,
+                        range === "1d"
+                          ? { hour: "2-digit", minute: "2-digit" }
+                          : { day: "numeric", month: "short" },
+                      )
+                    }
+                    stroke="#2C2922"
+                    tick={{ fill: "#6E6757", fontFamily: "var(--font-mono)", fontSize: 10 }}
+                    axisLine={{ stroke: "#2C2922" }}
+                    tickLine={false}
+                    minTickGap={48}
                   />
-                )}
-                <Tooltip
-                  cursor={{ stroke: "#F2EDE3", strokeWidth: 1, strokeDasharray: "2 4" }}
-                  contentStyle={{
-                    background: "#0D0C0A",
-                    border: "1px solid #2A2724",
-                    borderRadius: 0,
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 11,
-                    padding: "10px 14px",
-                  }}
-                  labelStyle={{ color: "#9B968A", textTransform: "uppercase", letterSpacing: "0.15em", fontSize: 10 }}
-                  formatter={(v: number) => [`Rp${fmtRupiah(v)}`, "USD/IDR"]}
-                  labelFormatter={(t) => fmtDateJakarta(t as number, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="rate"
-                  stroke="#F2EDE3"
-                  strokeWidth={1.5}
-                  dot={false}
-                  isAnimationActive
-                  animationDuration={1400}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </motion.div>
+                  <YAxis
+                    domain={["dataMin - 40", "dataMax + 40"]}
+                    tickFormatter={(v) => fmtRupiah(v)}
+                    stroke="#2C2922"
+                    tick={{ fill: "#6E6757", fontFamily: "var(--font-mono)", fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={56}
+                    orientation="right"
+                  />
+                  <Tooltip
+                    cursor={{ stroke: "#ECE7DB", strokeWidth: 1, strokeDasharray: "2 3" }}
+                    contentStyle={{
+                      background: "#1A1712",
+                      border: "1px solid #2C2922",
+                      borderRadius: 0,
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 11,
+                      padding: "8px 12px",
+                      color: "#ECE7DB",
+                    }}
+                    labelStyle={{
+                      color: "#6E6757",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.15em",
+                      fontSize: 9,
+                      marginBottom: 4,
+                    }}
+                    formatter={(v: number) => [`Rp${fmtRupiah(v)}`, "USD/IDR"]}
+                    labelFormatter={(t) =>
+                      fmtDateJakarta(t as number, {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    }
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="rate"
+                    stroke="#ECE7DB"
+                    strokeWidth={1.5}
+                    dot={false}
+                    isAnimationActive
+                    animationDuration={1100}
+                  />
+                  {stats && (
+                    <ReferenceDot
+                      x={stats.maxP.timestamp}
+                      y={stats.maxP.rate}
+                      r={3}
+                      fill="#E2483D"
+                      stroke="none"
+                      label={{
+                        value: `Tertinggi  Rp${fmtRupiah(stats.maxP.rate)}`,
+                        position: "top",
+                        fill: "#E2483D",
+                        fontSize: 10,
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    />
+                  )}
+                  {stats && (
+                    <ReferenceDot
+                      x={stats.minP.timestamp}
+                      y={stats.minP.rate}
+                      r={3}
+                      fill="#5FB98A"
+                      stroke="none"
+                      label={{
+                        value: `Terendah  Rp${fmtRupiah(stats.minP.rate)}`,
+                        position: "bottom",
+                        fill: "#5FB98A",
+                        fontSize: 10,
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    />
+                  )}
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </div>
 
-        <p className="mt-8 md:mt-12 font-mono text-[10px] uppercase tracking-[0.25em] text-bone/40 max-w-2xl">
-          Sumber data: Yahoo Finance · Diperbarui setiap 5 menit
-        </p>
+          <p className="kicker text-faint mt-5 border-t border-rule pt-4">
+            Sumber data · Yahoo Finance — diperbarui setiap 5 menit. Titik merah menandai level
+            terlemah, hijau level terkuat pada {rangeNote}.
+          </p>
+        </div>
       </div>
     </section>
   );
 }
 
-function Stat({ label, value, accent }: { label: string; value: string; accent?: "up" | "down" }) {
-  const color = accent === "down" ? "text-[#E07B5E]" : accent === "up" ? "text-[#A8C4A0]" : "text-bone";
+function StatRow({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: "up" | "down";
+}) {
+  const color = accent === "down" ? "text-red" : accent === "up" ? "text-green" : "text-paper";
   return (
-    <div>
-      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-bone/40 mb-2">{label}</div>
-      <div className={`font-serif italic text-2xl md:text-3xl ${color}`}>{value}</div>
+    <div className="flex items-baseline justify-between gap-3">
+      <dt className="kicker text-faint">{label}</dt>
+      <dd className={`font-mono text-sm ${color}`}>{value}</dd>
     </div>
   );
 }

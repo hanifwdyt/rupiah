@@ -4,25 +4,22 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useState } from "react";
 import { fmtRupiah, fmtPct, fmtDateJakarta } from "@/lib/format";
 
-type LatestRate = {
-  rate: number | null;
-  timestamp: number | null;
-  changePct: number | null;
-  source?: string;
-};
+type Latest = { rate: number | null; timestamp: number | null; changePct: number | null };
+type Point = { timestamp: number; rate: number };
 
-function useAnimatedNumber(target: number) {
+function useCounter(target: number) {
   const mv = useMotionValue(0);
   const out = useTransform(mv, (v) => fmtRupiah(v));
   useEffect(() => {
-    const controls = animate(mv, target, { duration: 1.1, ease: [0.22, 1, 0.36, 1] });
-    return () => controls.stop();
+    const c = animate(mv, target, { duration: 0.9, ease: [0.22, 1, 0.36, 1] });
+    return () => c.stop();
   }, [target, mv]);
   return out;
 }
 
 export function RateHero() {
-  const [data, setData] = useState<LatestRate | null>(null);
+  const [data, setData] = useState<Latest | null>(null);
+  const [yearStats, setYearStats] = useState<{ high: number; low: number; yoy: number } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,13 +32,19 @@ export function RateHero() {
       }
       try {
         const live = await fetch("/api/rates/live").then((r) => r.json());
-        if (cancelled || !live?.rate) return;
-        setData((prev) => ({
-          rate: live.rate,
-          timestamp: live.timestamp,
-          changePct: prev?.changePct ?? null,
-          source: live.source,
-        }));
+        if (!cancelled && live?.rate)
+          setData((p) => ({ rate: live.rate, timestamp: live.timestamp, changePct: p?.changePct ?? null }));
+      } catch {}
+      try {
+        const hist = await fetch("/api/rates/history?range=1y").then((r) => r.json());
+        const points: Point[] = hist.points || [];
+        if (!cancelled && points.length > 1) {
+          const rates = points.map((p) => p.rate);
+          const high = Math.max(...rates);
+          const low = Math.min(...rates);
+          const yoy = ((rates[rates.length - 1] - rates[0]) / rates[0]) * 100;
+          setYearStats({ high, low, yoy });
+        }
       } catch {}
     }
     load();
@@ -53,80 +56,81 @@ export function RateHero() {
   }, []);
 
   const rate = data?.rate ?? 0;
-  const animated = useAnimatedNumber(rate);
+  const counter = useCounter(rate);
   const change = data?.changePct;
   const dir = change == null ? "flat" : change > 0.02 ? "down" : change < -0.02 ? "up" : "flat";
 
-  const headline =
-    change == null
-      ? "Memantau pergerakan kurs dolar terhadap rupiah"
-      : change > 0.02
-        ? `Rupiah melemah ke Rp${fmtRupiah(rate)} per Dolar AS`
-        : change < -0.02
-          ? `Rupiah menguat ke Rp${fmtRupiah(rate)} per Dolar AS`
-          : `Rupiah bertahan di Rp${fmtRupiah(rate)} per Dolar AS`;
-
   return (
-    <section className="px-5 md:px-10 pt-8 md:pt-12 pb-10 md:pb-14">
-      <div className="kicker text-red mb-4">Laporan Utama · Kurs Hari Ini</div>
+    <header
+      id="top"
+      className="mx-auto max-w-page px-[var(--page-gutter)] pt-[var(--space-3xl)] pb-[var(--space-4xl)]"
+    >
+      {/* eyebrow-free: a single label line + the figure stacked vertically */}
+      <div className="flex items-center gap-2 label mb-[var(--space-lg)]">
+        <span className="live-dot" />
+        <span>Kurs USD ke IDR · {data?.timestamp ? `${fmtDateJakarta(data.timestamp, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} WIB` : "live"}</span>
+      </div>
 
-      <div className="grid lg:grid-cols-12 gap-6 lg:gap-10">
-        {/* Left: headline + standfirst */}
-        <div className="lg:col-span-7">
-          <h2 className="headline text-paper text-[clamp(30px,5.2vw,60px)] max-w-3xl">
-            {headline}
-          </h2>
-          <div className="rule-thin mt-6 pt-5 max-w-2xl">
-            <p className="standfirst text-dim text-lg md:text-xl">
-              Nilai tukar diperbarui setiap lima menit dari pasar global. Notifikasi otomatis dikirim
-              tiga kali sehari — pukul 09.00, 15.00, dan 21.00 WIB — lengkap dengan berita ekonomi
-              yang menyertainya.
-            </p>
-          </div>
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_auto] gap-x-[var(--space-2xl)] gap-y-[var(--space-lg)] items-end">
+        <div className="flex items-start gap-3">
+          <span className="font-display font-light text-2xl md:text-3xl text-muted mt-[0.6em]">Rp</span>
+          <motion.div
+            className="stat-figure text-stat text-ink"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <motion.span>{counter}</motion.span>
+          </motion.div>
         </div>
 
-        {/* Right: the number block */}
-        <div className="lg:col-span-5 lg:border-l lg:border-rule lg:pl-10">
-          <div className="kicker text-faint mb-3">1 Dolar AS</div>
-          <div className="flex items-start gap-2">
-            <span className="font-serif text-faint text-2xl md:text-3xl mt-3 md:mt-4">Rp</span>
-            <motion.div
-              className="headline text-paper tabular-nums leading-none text-[clamp(64px,13vw,128px)]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <motion.span>{animated}</motion.span>
-            </motion.div>
-          </div>
-
-          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2">
-            <span
-              className={`font-mono text-sm md:text-base ${
-                dir === "down" ? "text-red" : dir === "up" ? "text-green" : "text-dim"
-              }`}
-            >
-              {dir === "down" ? "▲" : dir === "up" ? "▼" : "■"}{" "}
-              {change == null ? "—" : `${fmtPct(change)} / 24 jam`}
-            </span>
-            <span className="font-mono text-xs text-faint">
-              {data?.timestamp
-                ? `Per ${fmtDateJakarta(data.timestamp, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} WIB`
-                : ""}
-            </span>
-          </div>
-
-          <p className="bodycopy text-dim mt-6 text-[15px] leading-relaxed border-t border-rule pt-5">
-            {change == null
-              ? "Memuat data terakhir dari pasar."
-              : change > 0.02
-                ? "Kenaikan angka berarti rupiah melemah — butuh lebih banyak rupiah untuk satu dolar."
-                : change < -0.02
-                  ? "Penurunan angka berarti rupiah menguat terhadap dolar."
-                  : "Pergerakan relatif datar dalam 24 jam terakhir."}
-          </p>
+        <div
+          className={`font-mono text-lg md:text-xl tabular-nums pb-2 ${
+            dir === "down" ? "text-down" : dir === "up" ? "text-up" : "text-muted"
+          }`}
+        >
+          {dir === "down" ? "▲" : dir === "up" ? "▼" : "■"}{" "}
+          {change == null ? "—" : `${fmtPct(change)} / 24 jam`}
         </div>
       </div>
-    </section>
+
+      <p className="mt-[var(--space-lg)] max-w-[var(--measure)] text-ink2 text-md md:text-lg leading-relaxed">
+        Harga satu dolar Amerika dalam rupiah, diperbarui setiap lima menit dari pasar global.
+        {yearStats
+          ? ` Dalam setahun terakhir rupiah ${yearStats.yoy >= 0 ? "melemah" : "menguat"} ${Math.abs(yearStats.yoy).toFixed(1)}% terhadap dolar.`
+          : ""}
+      </p>
+
+      {/* secondary stat strip — T4, real numbers only */}
+      <dl className="mt-[var(--space-2xl)] grid grid-cols-2 md:grid-cols-4 border-t border-rule">
+        <Stat label="Perubahan 24 jam" value={change == null ? "—" : fmtPct(change)} tone={dir} />
+        <Stat label="Tertinggi 52 pekan" value={yearStats ? `Rp${fmtRupiah(yearStats.high)}` : "—"} />
+        <Stat label="Terendah 52 pekan" value={yearStats ? `Rp${fmtRupiah(yearStats.low)}` : "—"} />
+        <Stat
+          label="Setahun"
+          value={yearStats ? fmtPct(yearStats.yoy) : "—"}
+          tone={yearStats ? (yearStats.yoy > 0 ? "down" : "up") : "flat"}
+        />
+      </dl>
+
+      <div className="mt-[var(--space-xl)]">
+        <a
+          href="#grafik"
+          className="inline-flex items-center gap-2 rounded-input border border-rule2 px-5 py-3 font-mono text-xs uppercase tracking-label text-ink2 transition-colors duration-[var(--dur-short)] ease-out hover:border-ink2 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focusring active:translate-y-px"
+        >
+          Lihat grafik <span aria-hidden>↓</span>
+        </a>
+      </div>
+    </header>
+  );
+}
+
+function Stat({ label, value, tone }: { label: string; value: string; tone?: "up" | "down" | "flat" }) {
+  const color = tone === "down" ? "text-down" : tone === "up" ? "text-up" : "text-ink";
+  return (
+    <div className="border-b border-rule py-[var(--space-md)] pr-[var(--space-md)] md:border-b-0 md:border-r last:border-r-0 md:pl-[var(--space-md)] md:first:pl-0">
+      <dt className="label mb-[var(--space-2xs)]">{label}</dt>
+      <dd className={`font-display font-light text-xl md:text-2xl tabular-nums ${color}`}>{value}</dd>
+    </div>
   );
 }

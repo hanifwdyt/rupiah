@@ -1,4 +1,4 @@
-import { Masthead } from "@/components/Masthead";
+import { Nav } from "@/components/Nav";
 import { RateHero } from "@/components/RateHero";
 import { RateChart } from "@/components/RateChart";
 import { SubscribePanel } from "@/components/SubscribePanel";
@@ -10,14 +10,16 @@ export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto max-w-[1400px] border-x border-rule min-h-screen">
-      <Masthead />
-      <RateHero />
-      <RateChart />
-      <SubscribePanel />
-      <NotificationList />
-      <NewsList />
-      <Footer />
-    </main>
+    <>
+      <Nav />
+      <main>
+        <RateHero />
+        <RateChart />
+        <SubscribePanel />
+        <NotificationList />
+        <NewsList />
+        <Footer />
+      </main>
+    </>
   );
 }

@@ -12,111 +12,86 @@ type NewsItem = {
   publishedAt: number;
 };
 
-function relativeTime(ts: number): string {
-  const diff = Date.now() - ts;
-  const h = Math.floor(diff / 3_600_000);
+function rel(ts: number): string {
+  const h = Math.floor((Date.now() - ts) / 3_600_000);
   if (h < 1) return "baru saja";
   if (h < 24) return `${h} jam lalu`;
-  const d = Math.floor(h / 24);
-  return `${d} hari lalu`;
+  return `${Math.floor(h / 24)} hari lalu`;
 }
 
 export function NewsList() {
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [limit, setLimit] = useState(12);
+  const [limit, setLimit] = useState(10);
 
   useEffect(() => {
     fetch("/api/news?limit=40")
       .then((r) => r.json())
-      .then((data) => setItems(data.items || []))
+      .then((d) => setItems(d.items || []))
       .finally(() => setLoading(false));
   }, []);
 
   const visible = items.slice(0, limit);
-  const lead = visible[0];
-  const rest = visible.slice(1);
 
   return (
-    <section className="px-5 md:px-10 py-10 md:py-14 border-t border-rule">
-      <div className="rule-thick pt-3 mb-8 md:mb-10 flex items-baseline justify-between">
-        <div className="kicker text-red">Berita Terkait</div>
-        <div className="kicker text-faint">Diperbarui tiap 6 jam</div>
-      </div>
+    <section className="mx-auto max-w-page px-[var(--page-gutter)] py-[var(--section-gap)]">
+      <h2 className="font-display font-light text-display-s text-ink tracking-tight max-w-2xl">
+        Kabar di balik angkanya
+      </h2>
+      <p className="mt-[var(--space-sm)] max-w-[var(--measure)] text-muted text-md">
+        Berita kurs, kebijakan, dan ekonomi yang menggerakkan rupiah — dikurasi tiap enam jam.
+      </p>
 
-      {loading ? (
-        <div className="kicker text-faint py-12">Memuat berita</div>
-      ) : items.length === 0 ? (
-        <div className="kicker text-faint py-12">Belum ada berita terkurasi</div>
-      ) : (
-        <>
-          {/* Lead story */}
-          {lead && (
-            <a
-              href={lead.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block border-b border-rule pb-8 mb-8"
-            >
-              <div className="grid lg:grid-cols-12 gap-4 lg:gap-10 items-baseline">
-                <div className="lg:col-span-2">
-                  <div className="kicker text-faint">{lead.source}</div>
-                  <div className="kicker text-faint mt-1">{relativeTime(lead.publishedAt)}</div>
-                </div>
-                <div className="lg:col-span-10">
-                  <h3 className="headline text-paper text-3xl md:text-5xl leading-[1.02] group-hover:text-red transition-colors max-w-4xl">
-                    {lead.title}
-                  </h3>
-                  {lead.excerpt && (
-                    <p className="bodycopy text-dim mt-4 max-w-2xl">{lead.excerpt}</p>
-                  )}
-                </div>
-              </div>
-            </a>
-          )}
-
-          {/* Index list */}
+      <div className="mt-[var(--space-xl)]">
+        {loading ? (
+          <div className="label py-[var(--space-2xl)]">Memuat berita</div>
+        ) : items.length === 0 ? (
+          <div className="label py-[var(--space-2xl)]">Belum ada berita terkurasi</div>
+        ) : (
           <ol className="border-t border-rule">
-            {rest.map((it, i) => (
+            {visible.map((it, i) => (
               <li key={it.id} className="border-b border-rule">
                 <a
                   href={it.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group grid grid-cols-12 gap-3 md:gap-6 py-5 items-baseline"
+                  className="group grid grid-cols-[2rem_minmax(0,1fr)] md:grid-cols-[3rem_minmax(0,1fr)_9rem] gap-[var(--space-md)] py-[var(--space-lg)] items-baseline transition-colors duration-[var(--dur-short)] hover:bg-paper2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focusring"
                 >
-                  <span className="col-span-2 md:col-span-1 font-mono text-sm text-faint tabular-nums">
-                    {String(i + 2).padStart(2, "0")}
-                  </span>
-                  <div className="col-span-10 md:col-span-8">
-                    <h4 className="font-serif text-paper text-lg md:text-2xl leading-snug group-hover:text-red transition-colors">
+                  <span className="font-mono text-sm text-muted tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                  <div className="min-w-0">
+                    <h3 className="font-display font-normal text-lg md:text-xl text-ink leading-snug transition-colors duration-[var(--dur-short)] group-hover:text-accent">
                       {it.title}
-                    </h4>
+                    </h3>
                     {it.excerpt && (
-                      <p className="bodycopy text-faint text-[14px] mt-1.5 line-clamp-2 md:hidden lg:block max-w-2xl">
+                      <p className="mt-[var(--space-2xs)] text-sm text-muted leading-relaxed line-clamp-2 max-w-[var(--measure)]">
                         {it.excerpt}
                       </p>
                     )}
+                    <div className="mt-[var(--space-xs)] md:hidden label">
+                      {it.source} · {rel(it.publishedAt)}
+                    </div>
                   </div>
-                  <div className="hidden md:block md:col-span-3 text-right">
-                    <div className="kicker text-faint">{it.source}</div>
-                    <div className="kicker text-faint mt-1">{relativeTime(it.publishedAt)}</div>
+                  <div className="hidden md:block text-right">
+                    <div className="label">{it.source}</div>
+                    <div className="font-mono text-xs text-muted mt-[var(--space-3xs)]">
+                      {rel(it.publishedAt)}
+                    </div>
                   </div>
                 </a>
               </li>
             ))}
           </ol>
+        )}
 
-          {limit < items.length && (
-            <button
-              onClick={() => setLimit((l) => l + 12)}
-              className="mt-8 kicker text-dim hover:text-paper border border-rule hover:border-paper px-5 py-3 transition-colors"
-            >
-              Muat lebih banyak ({items.length - limit})
-            </button>
-          )}
-        </>
-      )}
+        {!loading && limit < items.length && (
+          <button
+            onClick={() => setLimit((l) => l + 10)}
+            className="mt-[var(--space-lg)] rounded-input border border-rule px-5 py-3 font-mono text-xs uppercase tracking-label text-muted transition-colors duration-[var(--dur-short)] ease-out hover:border-rule2 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focusring"
+          >
+            Muat {items.length - limit} lagi
+          </button>
+        )}
+      </div>
     </section>
   );
 }

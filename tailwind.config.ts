@@ -8,23 +8,47 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Night-edition broadsheet
-        ink: "#13110D", // page background, warm near-black
-        ink2: "#1A1712", // panels / inset blocks
-        paper: "#ECE7DB", // primary text, warm off-white
-        dim: "#A39C8C", // secondary text
-        faint: "#6E6757", // tertiary / muted labels
-        rule: "#2C2922", // hairline rule color (solid)
-        red: "#E2483D", // alarm / rupiah weakening / accent
-        green: "#5FB98A", // rupiah strengthening
+        paper: "var(--color-paper)",
+        paper2: "var(--color-paper-2)",
+        paper3: "var(--color-paper-3)",
+        rule: "var(--color-rule)",
+        rule2: "var(--color-rule-2)",
+        muted: "var(--color-muted)",
+        neutral: "var(--color-neutral)",
+        ink2: "var(--color-ink-2)",
+        ink: "var(--color-ink)",
+        accent: "var(--color-accent)",
+        accentink: "var(--color-accent-ink)",
+        focusring: "var(--color-focus)",
+        up: "var(--color-up)",
+        down: "var(--color-down)",
       },
       fontFamily: {
-        serif: ["var(--font-serif)", "Georgia", "serif"],
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+        display: ["var(--font-display)"],
+        sans: ["var(--font-body)"],
+        mono: ["var(--font-mono)"],
+      },
+      fontSize: {
+        stat: "var(--text-stat)",
+        display: "var(--text-display)",
+        "display-s": "var(--text-display-s)",
       },
       letterSpacing: {
-        kicker: "0.22em",
+        label: "var(--tracking-label)",
+        display: "var(--tracking-display)",
+      },
+      transitionTimingFunction: {
+        out: "var(--ease-out)",
+        in: "var(--ease-in)",
+        "in-out": "var(--ease-in-out)",
+      },
+      borderRadius: {
+        card: "var(--radius-card)",
+        pill: "var(--radius-pill)",
+        input: "var(--radius-input)",
+      },
+      maxWidth: {
+        page: "var(--page-max)",
       },
     },
   },

@@ -12,12 +12,11 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
   return arr;
 }
-
 function detectIOS(): boolean {
   if (typeof navigator === "undefined") return false;
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window);
 }
-function isInStandaloneMode(): boolean {
+function isStandalone(): boolean {
   if (typeof window === "undefined") return false;
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
@@ -34,7 +33,7 @@ export function SubscribePanel() {
 
   useEffect(() => {
     setIsIOS(detectIOS());
-    setIsPWA(isInStandaloneMode());
+    setIsPWA(isStandalone());
     if (typeof window === "undefined") return;
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       setPush("unsupported");
@@ -102,111 +101,97 @@ export function SubscribePanel() {
       : push === "loading"
         ? "Memproses…"
         : push === "denied"
-          ? "Izin ditolak browser"
+          ? "Izin ditolak"
           : push === "unsupported"
-            ? "Tidak didukung browser"
-            : "Aktifkan notifikasi";
+            ? "Tak didukung"
+            : "Aktifkan di browser ini";
 
   return (
-    <section className="px-5 md:px-10 py-10 md:py-14 border-t border-rule">
-      <div className="rule-thick pt-3 mb-8 md:mb-10 flex items-baseline justify-between">
-        <div className="kicker text-red">Langganan</div>
-        <div className="kicker text-faint">Gratis · 3× sehari</div>
-      </div>
+    <section
+      id="langganan"
+      className="mx-auto max-w-page px-[var(--page-gutter)] py-[var(--section-gap)]"
+    >
+      <h2 className="font-display font-light text-display-s text-ink tracking-tight max-w-2xl">
+        Berhenti memeriksa kurs setiap saat
+      </h2>
+      <p className="mt-[var(--space-sm)] max-w-[var(--measure)] text-muted text-md">
+        Daftar sekali — kabar terbarunya yang menghampiri kamu, tiga kali sehari, pukul 09.00, 15.00,
+        dan 21.00 WIB.
+      </p>
 
-      <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
-        <div className="lg:col-span-4">
-          <h3 className="headline text-paper text-3xl md:text-4xl max-w-sm">
-            Berhenti memeriksa kurs setiap saat
-          </h3>
-          <p className="bodycopy text-dim mt-5 max-w-sm">
-            Daftar sekali, dan biarkan kabar terbaru yang menghampiri. Update dikirim setiap pukul
-            09.00, 15.00, dan 21.00 WIB.
+      <div className="mt-[var(--space-2xl)] grid md:grid-cols-2 gap-[var(--space-2xl)]">
+        {/* Push */}
+        <div className="md:pr-[var(--space-2xl)] md:border-r border-rule flex flex-col">
+          <div className="label mb-[var(--space-sm)]">Lewat browser</div>
+          <p className="text-ink2 text-md leading-relaxed flex-1">
+            Notifikasi muncul langsung di perangkat tanpa membuka situs. Jalan di Android, desktop,
+            dan iPhone setelah ditambahkan ke layar utama.
           </p>
+
+          {isIOS && !isPWA && (
+            <p className="mt-[var(--space-md)] text-sm text-muted leading-relaxed border-l border-rule2 pl-[var(--space-md)]">
+              Di iPhone: buka menu Bagikan di Safari, pilih <span className="font-mono">Tambah ke Layar Utama</span>, lalu aktifkan dari sana.
+            </p>
+          )}
+
+          <button
+            onClick={enablePush}
+            disabled={push === "loading" || push === "subscribed" || push === "unsupported"}
+            className={`mt-[var(--space-lg)] inline-flex items-center justify-between gap-3 rounded-input px-5 py-3.5 font-mono text-xs uppercase tracking-label transition-colors duration-[var(--dur-short)] ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focusring ${
+              push === "subscribed"
+                ? "bg-paper3 text-ink cursor-default"
+                : push === "unsupported" || push === "denied"
+                  ? "border border-rule text-muted opacity-60 cursor-not-allowed"
+                  : "bg-accent text-accentink hover:bg-ink2 active:translate-y-px"
+            }`}
+          >
+            <span>{pushLabel}</span>
+            {push === "idle" && <span aria-hidden>→</span>}
+          </button>
         </div>
 
-        {/* Two subscription "boxes" like a newspaper classified */}
-        <div className="lg:col-span-8 grid md:grid-cols-2 border border-rule">
-          {/* Push */}
-          <div className="p-6 md:p-8 border-b md:border-b-0 md:border-r border-rule flex flex-col">
-            <div className="flex items-baseline justify-between mb-4">
-              <span className="kicker text-faint">Cara 01</span>
-              <span className="kicker text-faint">Browser</span>
-            </div>
-            <h4 className="headline text-paper text-2xl mb-3">Notifikasi langsung</h4>
-            <p className="bodycopy text-dim text-[15px] flex-1 mb-6">
-              Muncul di perangkat tanpa perlu membuka situs. Berfungsi di Android, desktop, dan
-              iPhone (lewat Add to Home Screen).
-            </p>
-
-            {isIOS && !isPWA && (
-              <p className="kicker text-faint leading-relaxed normal-case tracking-normal text-[12px] mb-5 border-l-2 border-red pl-3">
-                <span className="kicker text-red">Untuk iOS — </span>
-                buka menu Share di Safari, pilih <em>Add to Home Screen</em>, lalu aktifkan dari sana.
-              </p>
-            )}
-
+        {/* Email — C2 inline form */}
+        <div className="flex flex-col">
+          <div className="label mb-[var(--space-sm)]">Lewat email</div>
+          <p className="text-ink2 text-md leading-relaxed flex-1">
+            Tiga ringkasan singkat per hari ke inbox. Konfirmasi alamat sekali, setelahnya otomatis.
+          </p>
+          <form onSubmit={submitEmail} className="mt-[var(--space-lg)] flex flex-col sm:flex-row gap-[var(--space-sm)]">
+            <label htmlFor="email" className="sr-only">Alamat email</label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="nama@email.com"
+              className="flex-1 min-w-0 rounded-input border border-rule bg-paper2 px-4 py-3.5 font-mono text-sm text-ink placeholder:text-muted outline-none transition-colors duration-[var(--dur-short)] hover:border-rule2 focus:border-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focusring"
+            />
             <button
-              onClick={enablePush}
-              disabled={push === "loading" || push === "subscribed" || push === "unsupported"}
-              className={`group flex items-center justify-between border px-5 py-3.5 transition-colors ${
-                push === "subscribed"
-                  ? "bg-paper text-ink border-paper cursor-default"
-                  : push === "unsupported" || push === "denied"
-                    ? "border-rule text-faint opacity-60 cursor-not-allowed"
-                    : "border-paper text-paper hover:bg-paper hover:text-ink"
+              type="submit"
+              disabled={emailState === "loading" || emailState === "sent"}
+              className={`whitespace-nowrap rounded-input px-5 py-3.5 font-mono text-xs uppercase tracking-label transition-colors duration-[var(--dur-short)] ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focusring ${
+                emailState === "sent"
+                  ? "bg-paper3 text-ink cursor-default"
+                  : "bg-accent text-accentink hover:bg-ink2 active:translate-y-px"
               }`}
             >
-              <span className="kicker">{pushLabel}</span>
-              {push !== "subscribed" && push !== "denied" && push !== "unsupported" && (
-                <span className="font-serif text-lg group-hover:translate-x-1 transition-transform">→</span>
-              )}
+              {emailState === "loading"
+                ? "Mengirim…"
+                : emailState === "sent"
+                  ? "Cek inbox"
+                  : emailState === "error"
+                    ? "Coba lagi"
+                    : "Daftar"}
             </button>
-          </div>
-
-          {/* Email */}
-          <div className="p-6 md:p-8 flex flex-col">
-            <div className="flex items-baseline justify-between mb-4">
-              <span className="kicker text-faint">Cara 02</span>
-              <span className="kicker text-faint">Email</span>
-            </div>
-            <h4 className="headline text-paper text-2xl mb-3">Ringkasan ke inbox</h4>
-            <p className="bodycopy text-dim text-[15px] flex-1 mb-6">
-              Tiga email singkat per hari berisi kurs terbaru. Konfirmasi alamat sekali di awal.
-            </p>
-            <form onSubmit={submitEmail} className="space-y-3">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="nama@email.com"
-                className="w-full bg-transparent border-b border-rule focus:border-paper py-3 font-mono text-sm text-paper placeholder:text-faint outline-none transition-colors"
-              />
-              <button
-                type="submit"
-                disabled={emailState === "loading" || emailState === "sent"}
-                className={`group w-full flex items-center justify-between border px-5 py-3.5 transition-colors ${
-                  emailState === "sent"
-                    ? "bg-paper text-ink border-paper cursor-default"
-                    : "border-paper text-paper hover:bg-paper hover:text-ink"
-                }`}
-              >
-                <span className="kicker">
-                  {emailState === "loading"
-                    ? "Mengirim…"
-                    : emailState === "sent"
-                      ? "Cek inbox kamu"
-                      : emailState === "error"
-                        ? "Gagal — coba lagi"
-                        : "Daftar"}
-                </span>
-                {emailState === "idle" && (
-                  <span className="font-serif text-lg group-hover:translate-x-1 transition-transform">→</span>
-                )}
-              </button>
-            </form>
-          </div>
+          </form>
+          <p className="mt-[var(--space-sm)] text-sm text-muted min-h-[1lh]">
+            {emailState === "sent"
+              ? "Tautan konfirmasi sudah dikirim ke email kamu."
+              : emailState === "error"
+                ? "Gagal mengirim. Periksa alamat dan coba lagi."
+                : "Bisa berhenti kapan saja."}
+          </p>
         </div>
       </div>
     </section>

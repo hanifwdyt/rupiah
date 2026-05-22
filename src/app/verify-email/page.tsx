@@ -15,7 +15,7 @@ export default async function VerifyEmailPage({
       body: "Update kurs USD/IDR akan dikirim ke inbox kamu setiap pukul 09.00, 15.00, dan 21.00 WIB.",
     },
     invalid: {
-      title: "Link tidak valid",
+      title: "Tautan tidak valid",
       body: "Tautan verifikasi sudah pernah digunakan atau kedaluwarsa. Silakan daftar ulang dari halaman utama.",
     },
     error: {
@@ -27,16 +27,17 @@ export default async function VerifyEmailPage({
   const content = map[status || ""] ?? map.error;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center mx-auto max-w-[1400px] border-x border-rule">
-      <div className="kicker text-red mb-6">Rupiah Watch · Verifikasi</div>
-      <h1 className="headline text-paper text-5xl md:text-7xl max-w-2xl mb-6">{content.title}</h1>
-      <p className="bodycopy text-dim max-w-md mb-10">{content.body}</p>
+    <main className="min-h-screen flex flex-col items-center justify-center px-[var(--page-gutter)] text-center">
+      <div className="label mb-[var(--space-lg)]">USD/IDR · Verifikasi</div>
+      <h1 className="font-display font-light text-display-s text-ink tracking-tight max-w-2xl mb-[var(--space-md)]">
+        {content.title}
+      </h1>
+      <p className="text-muted text-md max-w-md mb-[var(--space-xl)]">{content.body}</p>
       <Link
         href="/"
-        className="group inline-flex items-center gap-3 border border-paper text-paper px-7 py-3.5 hover:bg-paper hover:text-ink transition-colors"
+        className="inline-flex items-center gap-2 rounded-input border border-rule2 px-6 py-3 font-mono text-xs uppercase tracking-label text-ink2 transition-colors duration-[var(--dur-short)] ease-out hover:border-ink2 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focusring"
       >
-        <span className="kicker">Kembali ke beranda</span>
-        <span className="font-serif text-lg group-hover:translate-x-1 transition-transform">→</span>
+        Kembali ke beranda <span aria-hidden>→</span>
       </Link>
     </main>
   );

@@ -22,79 +22,80 @@ export function NotificationList() {
   useEffect(() => {
     fetch("/api/notifications?limit=40")
       .then((r) => r.json())
-      .then((data) => setItems(data.items || []))
+      .then((d) => setItems(d.items || []))
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <section className="px-5 md:px-10 py-10 md:py-14 border-t border-rule">
-      <div className="rule-thick pt-3 mb-8 md:mb-10 flex items-baseline justify-between">
-        <div className="kicker text-red">Catatan · Riwayat Kirim</div>
-        <div className="kicker text-faint">09.00 · 15.00 · 21.00 WIB</div>
-      </div>
+    <section className="mx-auto max-w-page px-[var(--page-gutter)] py-[var(--section-gap)]">
+      <h2 className="font-display font-light text-display-s text-ink tracking-tight max-w-2xl">
+        Setiap update yang sudah dikirim
+      </h2>
+      <p className="mt-[var(--space-sm)] max-w-[var(--measure)] text-muted text-md">
+        Catatan lengkap pengiriman notifikasi — kurs saat itu, perubahannya, dan jumlah penerima.
+      </p>
 
-      <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
-        <div className="lg:col-span-3">
-          <h3 className="headline text-paper text-3xl md:text-4xl max-w-xs">
-            Setiap notifikasi yang pernah dikirim
-          </h3>
-          <p className="bodycopy text-dim mt-5 text-[15px] max-w-xs">
-            Arsip lengkap pengiriman update kurs, beserta jumlah penerima di tiap kanal.
-          </p>
-        </div>
-
-        <div className="lg:col-span-9">
-          {loading ? (
-            <div className="kicker text-faint py-12">Memuat riwayat</div>
-          ) : items.length === 0 ? (
-            <div className="kicker text-faint py-12">Belum ada notifikasi terkirim</div>
-          ) : (
-            <ul className="border-t border-rule">
+      <div className="mt-[var(--space-xl)]">
+        {loading ? (
+          <div className="label py-[var(--space-2xl)]">Memuat riwayat</div>
+        ) : items.length === 0 ? (
+          <div className="label py-[var(--space-2xl)]">Belum ada notifikasi terkirim</div>
+        ) : (
+          <div role="table" className="border-t border-rule">
+            <div role="row" className="hidden md:grid grid-cols-[7rem_5rem_1fr_6rem_2rem] gap-[var(--space-md)] py-[var(--space-sm)] border-b border-rule label">
+              <span role="columnheader">Tanggal</span>
+              <span role="columnheader">Sesi</span>
+              <span role="columnheader">Kurs</span>
+              <span role="columnheader" className="text-right">24 jam</span>
+              <span role="columnheader" />
+            </div>
+            <ul>
               {items.map((it) => {
-                const isOpen = expanded === it.id;
-                const change = it.rateChangePct;
-                const dir =
-                  change == null ? "flat" : change > 0.02 ? "down" : change < -0.02 ? "up" : "flat";
+                const open = expanded === it.id;
+                const c = it.rateChangePct;
+                const dir = c == null ? "flat" : c > 0.02 ? "down" : c < -0.02 ? "up" : "flat";
                 return (
                   <li key={it.id} className="border-b border-rule">
                     <button
-                      onClick={() => setExpanded(isOpen ? null : it.id)}
-                      className="w-full flex items-center gap-4 md:gap-8 py-4 md:py-5 text-left group"
+                      onClick={() => setExpanded(open ? null : it.id)}
+                      aria-expanded={open}
+                      className="w-full grid grid-cols-[1fr_auto] md:grid-cols-[7rem_5rem_1fr_6rem_2rem] gap-x-[var(--space-md)] gap-y-[var(--space-2xs)] items-baseline py-[var(--space-md)] text-left transition-colors duration-[var(--dur-short)] hover:bg-paper2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focusring"
                     >
-                      <span className="font-mono text-[11px] text-faint w-20 md:w-28 shrink-0 tabular-nums">
+                      <span className="font-mono text-xs text-muted tabular-nums order-1 md:order-none">
                         {fmtDateJakarta(it.sentAt, { day: "2-digit", month: "short" })}
                       </span>
-                      <span className="kicker text-faint w-14 shrink-0">{slotLabel(it.slot)}</span>
-                      <span className="font-serif text-paper text-xl md:text-2xl flex-1 tabular-nums">
+                      <span className="label order-3 md:order-none">{slotLabel(it.slot)}</span>
+                      <span className="font-display font-light text-xl text-ink tabular-nums order-2 md:order-none">
                         Rp{fmtRupiah(it.rate)}
                       </span>
                       <span
-                        className={`font-mono text-xs md:text-sm shrink-0 ${
-                          dir === "down" ? "text-red" : dir === "up" ? "text-green" : "text-faint"
+                        className={`font-mono text-sm tabular-nums text-right order-4 md:order-none ${
+                          dir === "down" ? "text-down" : dir === "up" ? "text-up" : "text-muted"
                         }`}
                       >
-                        {change != null ? fmtPct(change) : "—"}
+                        {c != null ? fmtPct(c) : "—"}
                       </span>
                       <span
-                        className={`font-serif text-xl text-dim shrink-0 transition-transform ${isOpen ? "rotate-45" : ""}`}
+                        className={`hidden md:block font-mono text-lg text-muted text-right transition-transform duration-[var(--dur-short)] ${open ? "rotate-45" : ""}`}
+                        aria-hidden
                       >
                         +
                       </span>
                     </button>
                     <AnimatePresence initial={false}>
-                      {isOpen && (
+                      {open && (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                          transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
                           className="overflow-hidden"
                         >
-                          <div className="pb-5 pl-0 md:pl-[8.5rem] grid grid-cols-2 md:grid-cols-4 gap-5">
+                          <div className="pb-[var(--space-md)] grid grid-cols-2 md:grid-cols-4 gap-[var(--space-lg)] md:pl-[calc(7rem+var(--space-md))]">
                             <Field label="Waktu" value={`${fmtDateJakarta(it.sentAt, { hour: "2-digit", minute: "2-digit" })} WIB`} />
-                            <Field label="Push" value={String(it.pushSentCount)} />
-                            <Field label="Email" value={String(it.emailSentCount)} />
-                            <Field label="Slot" value={slotLabel(it.slot)} />
+                            <Field label="Push terkirim" value={String(it.pushSentCount)} />
+                            <Field label="Email terkirim" value={String(it.emailSentCount)} />
+                            <Field label="Sesi" value={slotLabel(it.slot)} />
                           </div>
                         </motion.div>
                       )}
@@ -103,8 +104,8 @@ export function NotificationList() {
                 );
               })}
             </ul>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -113,8 +114,8 @@ export function NotificationList() {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="kicker text-faint mb-1">{label}</div>
-      <div className="font-mono text-sm text-paper">{value}</div>
+      <div className="label mb-[var(--space-3xs)]">{label}</div>
+      <div className="font-mono text-sm text-ink2 tabular-nums">{value}</div>
     </div>
   );
 }

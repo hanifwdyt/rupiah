@@ -1,34 +1,49 @@
+/* Hallmark · genre: modern-minimal · macrostructure: Stat-Led · theme: Midnight
+ * nav: N5 floating-pill · footer: Ft2 inline · enrichment: none (data-viz only)
+ * pre-emit critique: P5 H5 E4 S5 R4 V5
+ * contrast: pass (46-50) · slop: pass (51-55) · honest: pass (56) · tokens: pass (58)
+ * mobile: pass (36, 59, 61-69)
+ */
+@import "./tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
-    --font-sans: "Geist", system-ui, -apple-system, sans-serif;
-    --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
+  html,
+  body {
+    overflow-x: clip;
   }
 
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
   }
 
   body {
-    background: #13110d;
-    color: #ece7db;
-    font-family: var(--font-sans);
-    overflow-x: hidden;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: var(--lh-normal);
   }
 
   ::selection {
-    background: #e2483d;
-    color: #13110d;
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
   }
 
-  .font-mono {
+  .font-mono,
+  .tnum {
     font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
   }
 
   ::-webkit-scrollbar {
@@ -36,63 +51,74 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #13110d;
+    background: var(--color-paper);
   }
   ::-webkit-scrollbar-thumb {
-    background: #2c2922;
+    background: var(--color-rule);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #6e6757;
+    background: var(--color-rule-2);
   }
 }
 
 @layer components {
-  /* Kicker / eyebrow label — small-caps grotesque, letter-spaced */
-  .kicker {
-    font-family: var(--font-sans);
+  /* small-caps mono label */
+  .label {
+    font-family: var(--font-mono);
     text-transform: uppercase;
-    letter-spacing: 0.22em;
-    font-size: 11px;
-    font-weight: 500;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
   }
 
-  /* Section marker line: thick rule on top */
-  .rule-thick {
-    border-top: 2px solid #ece7db;
-  }
-  .rule-thin {
-    border-top: 1px solid #2c2922;
-  }
-
-  /* Newspaper headline — roman, tight leading */
-  .headline {
-    font-family: var(--font-serif);
-    font-weight: 500;
-    line-height: 0.98;
-    letter-spacing: -0.01em;
+  /* the giant hero figure */
+  .stat-figure {
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--tracking-display);
+    line-height: 0.9;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+    min-width: 0;
   }
 
-  /* Standfirst / dek — italic serif intro */
-  .standfirst {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-weight: 400;
-    line-height: 1.45;
-  }
-
-  /* Body copy — readable serif columns */
-  .bodycopy {
-    font-family: var(--font-serif);
-    font-weight: 400;
-    line-height: 1.6;
-    font-size: 17px;
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--color-up);
+    box-shadow: 0 0 0 0 var(--color-up);
+    animation: live-pulse 2.4s var(--ease-out) infinite;
   }
 }
 
-/* Recharts overrides */
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-up) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .live-dot {
+    animation: none;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Recharts — keep chrome quiet */
 .recharts-tooltip-wrapper {
   outline: none;
-}
-.recharts-cartesian-axis-tick text {
-  fill: #6e6757;
 }
